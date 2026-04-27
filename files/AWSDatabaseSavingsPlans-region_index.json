@@ -1,0 +1,114 @@
+{
+  "disclaimer" : "This pricing list is for informational purposes only. All prices are subject to the additional terms included in the pricing pages on http://aws.amazon.com. All Free Tier prices are also subject to the terms included at https://aws.amazon.com/free/",
+  "publicationDate" : "2026-04-22T19:42:03Z",
+  "regions" : [ {
+    "regionCode" : "ap-south-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-south-2/index.json"
+  }, {
+    "regionCode" : "ap-south-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-south-1/index.json"
+  }, {
+    "regionCode" : "eu-south-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-south-1/index.json"
+  }, {
+    "regionCode" : "eu-south-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-south-2/index.json"
+  }, {
+    "regionCode" : "us-gov-east-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/us-gov-east-1/index.json"
+  }, {
+    "regionCode" : "me-central-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/me-central-1/index.json"
+  }, {
+    "regionCode" : "il-central-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/il-central-1/index.json"
+  }, {
+    "regionCode" : "ca-central-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ca-central-1/index.json"
+  }, {
+    "regionCode" : "ap-east-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-east-2/index.json"
+  }, {
+    "regionCode" : "mx-central-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/mx-central-1/index.json"
+  }, {
+    "regionCode" : "eu-central-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-central-1/index.json"
+  }, {
+    "regionCode" : "eu-central-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-central-2/index.json"
+  }, {
+    "regionCode" : "us-west-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/us-west-1/index.json"
+  }, {
+    "regionCode" : "us-west-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/us-west-2/index.json"
+  }, {
+    "regionCode" : "af-south-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/af-south-1/index.json"
+  }, {
+    "regionCode" : "eu-west-3",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-west-3/index.json"
+  }, {
+    "regionCode" : "eu-north-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-north-1/index.json"
+  }, {
+    "regionCode" : "eu-west-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-west-2/index.json"
+  }, {
+    "regionCode" : "eu-west-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/eu-west-1/index.json"
+  }, {
+    "regionCode" : "ap-northeast-3",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-northeast-3/index.json"
+  }, {
+    "regionCode" : "ap-northeast-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-northeast-2/index.json"
+  }, {
+    "regionCode" : "ap-northeast-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-northeast-1/index.json"
+  }, {
+    "regionCode" : "me-south-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/me-south-1/index.json"
+  }, {
+    "regionCode" : "sa-east-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/sa-east-1/index.json"
+  }, {
+    "regionCode" : "ap-east-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-east-1/index.json"
+  }, {
+    "regionCode" : "us-gov-west-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/us-gov-west-1/index.json"
+  }, {
+    "regionCode" : "ca-west-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ca-west-1/index.json"
+  }, {
+    "regionCode" : "ap-southeast-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-1/index.json"
+  }, {
+    "regionCode" : "ap-southeast-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-2/index.json"
+  }, {
+    "regionCode" : "ap-southeast-3",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-3/index.json"
+  }, {
+    "regionCode" : "ap-southeast-4",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-4/index.json"
+  }, {
+    "regionCode" : "ap-southeast-5",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-5/index.json"
+  }, {
+    "regionCode" : "us-east-1",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/us-east-1/index.json"
+  }, {
+    "regionCode" : "us-east-2",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/us-east-2/index.json"
+  }, {
+    "regionCode" : "ap-southeast-6",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-6/index.json"
+  }, {
+    "regionCode" : "ap-southeast-7",
+    "versionUrl" : "/savingsPlan/v1.0/aws/AWSDatabaseSavingsPlans/20260422194203/ap-southeast-7/index.json"
+  } ],
+  "formatVersion" : "v1.0"
+}
