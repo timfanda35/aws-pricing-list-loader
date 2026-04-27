@@ -1,0 +1,27 @@
+CREATE TABLE aws_data_transfer_ingestion (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT PRIMARY KEY,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "related_to" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "transfer_type" TEXT,
+    "from_location" TEXT,
+    "from_location_type" TEXT,
+    "to_location" TEXT,
+    "to_location_type" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "from_region_code" TEXT,
+    "service_name" TEXT,
+    "to_region_code" TEXT
+);
+CREATE INDEX aws_data_transfer_20260423124529_sku ON aws_data_transfer_ingestion (sku);

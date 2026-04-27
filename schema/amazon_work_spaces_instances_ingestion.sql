@@ -1,0 +1,33 @@
+CREATE TABLE amazon_work_spaces_instances_ingestion (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT PRIMARY KEY,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "instance_type" TEXT,
+    "instance_family" TEXT,
+    "v_cpu" TEXT,
+    "memory" TEXT,
+    "tenancy" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "billing_option" TEXT,
+    "core_type" TEXT,
+    "ec2_operation" TEXT,
+    "ec2_platform_type" TEXT,
+    "ec2_usage_type" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT
+);
+CREATE INDEX amazon_work_spaces_instances_20260129145806_sku ON amazon_work_spaces_instances_ingestion (sku);
+CREATE INDEX amazon_work_spaces_instances_20260129145806_region_code ON amazon_work_spaces_instances_ingestion (region_code);

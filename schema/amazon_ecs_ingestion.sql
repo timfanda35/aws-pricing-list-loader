@@ -1,0 +1,32 @@
+CREATE TABLE amazon_ecs_ingestion (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT PRIMARY KEY,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "instance_type" TEXT,
+    "tenancy" TEXT,
+    "operating_system" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "cpu_architecture" TEXT,
+    "cpu_type" TEXT,
+    "external_instance_type" TEXT,
+    "memory_type" TEXT,
+    "region_code" TEXT,
+    "resource" TEXT,
+    "service_name" TEXT,
+    "storage_type" TEXT
+);
+CREATE INDEX amazon_ecs_20260216071830_sku ON amazon_ecs_ingestion (sku);
+CREATE INDEX amazon_ecs_20260216071830_region_code ON amazon_ecs_ingestion (region_code);

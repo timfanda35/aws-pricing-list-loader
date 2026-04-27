@@ -1,0 +1,30 @@
+CREATE TABLE amazon_glacier_ingestion (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT PRIMARY KEY,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "availability" TEXT,
+    "volume_type" TEXT,
+    "fee_code" TEXT,
+    "fee_description" TEXT,
+    "group" TEXT,
+    "group_description" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "durability" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT
+);
+CREATE INDEX amazon_glacier_20221116002454_sku ON amazon_glacier_ingestion (sku);
+CREATE INDEX amazon_glacier_20221116002454_region_code ON amazon_glacier_ingestion (region_code);
