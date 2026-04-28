@@ -1,0 +1,17 @@
+.git/
+.gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.env
+output.txt
+schema/
+files/
+README.md
+CLAUDE.md
+references.md
+test_create_table.py
+tests/
+docs/
