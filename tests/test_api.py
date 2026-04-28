@@ -113,3 +113,13 @@ class TestListVersions:
         with patch("app.routers.versions.get_all_versions", return_value=[]):
             response = client.get("/versions")
         assert response.json() == []
+
+
+class TestHealth:
+    def test_returns_200(self):
+        response = client.get("/health")
+        assert response.status_code == 200
+
+    def test_returns_ok_body(self):
+        response = client.get("/health")
+        assert response.json() == {"status": "ok"}
