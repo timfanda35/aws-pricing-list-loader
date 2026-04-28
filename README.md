@@ -6,25 +6,30 @@ Exposed as a FastAPI HTTP service, with a CLI available for local use.
 
 ## Setup
 
+### Docker (recommended)
+
 ```bash
-pip install -r requirements.txt
 cp .env.example .env  # fill in Postgres credentials
-docker compose up -d  # start Postgres
-python create_table.py  # create aws_pricing_list_versions table
+docker compose up --build -d
+```
+
+Starts both PostgreSQL and the API. The API container automatically creates the `aws_pricing_list_versions` table on first start. Interactive docs at `http://localhost:8000/docs`.
+
+### Local development
+
+```bash
+pip install -r requirements-dev.txt
+cp .env.example .env  # fill in Postgres credentials
+docker compose up -d db  # start Postgres only
+python create_table.py   # create aws_pricing_list_versions table
+uvicorn app.main:app --reload
 ```
 
 ## API
 
-Start the server:
-
-```bash
-uvicorn app.main:app --reload
-```
-
-Interactive docs available at `http://localhost:8000/docs`.
-
 | Method | Path | Description |
 |--------|------|-------------|
+| `GET` | `/health` | Liveness check — returns `{"status":"ok"}` |
 | `GET` | `/pricing/urls` | List all discovered pricing URLs; generates any missing schema files |
 | `POST` | `/pricing/load` | Load pricing data into PostgreSQL (blocks until complete) |
 | `GET` | `/versions` | List all loaded service versions |
@@ -86,6 +91,7 @@ To force schema regeneration, delete the corresponding `.sql` file and re-run in
 No database or network connection required:
 
 ```bash
+pip install -r requirements-dev.txt
 pytest tests/
 ```
 

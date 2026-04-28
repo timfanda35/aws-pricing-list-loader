@@ -5,10 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Install runtime + dev dependencies (for local development)
+pip install -r requirements-dev.txt
 
-# Start the API server
+# Start the API server (local dev)
 uvicorn app.main:app --reload
 
 # Run unit and API tests (no DB or network required)
@@ -26,6 +26,17 @@ python fetch_pricing_index.py --load
 # CLI — load a single service or savings plan (for testing)
 python fetch_pricing_index.py --load --name comprehend
 python fetch_pricing_index.py --load --name AWSDatabaseSavingsPlans
+```
+
+```bash
+# Docker — build and start the full stack (DB + API)
+docker compose up --build -d
+
+# Docker — view logs
+docker compose logs -f api
+
+# Docker — tear down
+docker compose down
 ```
 
 PostgreSQL connection is configured via env vars (see `.env.example`): `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`. Managed by `app/config.py` using `pydantic-settings`.
@@ -52,6 +63,7 @@ app/
 
 | Method | Path | Description |
 |--------|------|-------------|
+| `GET` | `/health` | Liveness check; returns `{"status": "ok"}` |
 | `GET` | `/pricing/urls` | List all pricing URLs; generates missing schema files |
 | `POST` | `/pricing/load` | Load pricing data into DB (blocking); optional `{"name": "..."}` body |
 | `GET` | `/versions` | List loaded service versions from `aws_pricing_list_versions` |
@@ -84,6 +96,18 @@ app/
 - `BASE_URL` — `https://pricing.us-east-1.amazonaws.com` (in `app/services/aws_client.py`)
 - `SCHEMA_DIR` — `./schema/` (in `app/services/schema_builder.py`)
 - CSV line 6 (0-indexed line 5) contains column headers; first 5 lines are AWS metadata
+
+## Container files
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Multi-stage build: builder installs deps into `/opt/venv`; runtime stage copies venv + app, runs as non-root `appuser` |
+| `docker-entrypoint.sh` | Runs `create_table.py` (idempotent) then `exec`s uvicorn for signal-safe startup |
+| `.dockerignore` | Excludes `.env`, `schema/`, `tests/`, dev files from the image |
+| `requirements.txt` | Runtime-only pinned deps (used by Dockerfile) |
+| `requirements-dev.txt` | Runtime + dev/test deps (pytest, httpx); used for local development |
+
+`docker compose up --build -d` starts both `db` (postgres:17) and `api`. The `api` service waits for the DB healthcheck (`pg_isready`) before starting. `POSTGRES_HOST` is overridden to `db` (the compose service name) inside the container.
 
 ## files/ directory
 
