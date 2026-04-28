@@ -26,10 +26,10 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./schema:/app/schema
+      - schema:/app/schema
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -37,3 +37,4 @@ services:
 
 volumes:
   pgdata:
+  schema:
