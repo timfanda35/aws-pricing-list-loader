@@ -2,7 +2,9 @@ import hashlib
 import os
 import re
 import sys
+import tempfile
 import time
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -181,7 +183,7 @@ def _index_name(table: str, version: str, col: str) -> str:
 
 def build_schema_sql(table: str, columns: list[str], version: str) -> str:
     col_defs = ',\n'.join(_column_definition(c) for c in columns)
-    ddl = f"CREATE TABLE {table} (\n{col_defs}\n);"
+    ddl = f"CREATE TABLE IF NOT EXISTS {table} (\n{col_defs}\n);"
     index_lines = [
         f"CREATE INDEX {_index_name(table, version, col)} ON {table} ({col});"
         for col in columns if col in _INDEX_COLUMNS
@@ -254,19 +256,193 @@ def generate_missing_schemas(all_urls: list[dict], schema_dir: Path = SCHEMA_DIR
             db_conn.close()
 
 
-if __name__ == "__main__":
+def _get_db_conn():
+    return psycopg2.connect(
+        host=os.environ["POSTGRES_HOST"],
+        port=int(os.environ.get("POSTGRES_PORT", 5432)),
+        dbname=os.environ["POSTGRES_DB"],
+        user=os.environ["POSTGRES_USER"],
+        password=os.environ["POSTGRES_PASSWORD"],
+    )
+
+
+def _create_ingestion_table(conn, ingestion_table: str, csv_url: str, version: str) -> list[str]:
+    columns = get_csv_column_names(f"{BASE_URL}{csv_url}")
+    ddl = build_schema_sql(ingestion_table, columns, version)
+    with conn.cursor() as cur:
+        cur.execute(f'DROP TABLE IF EXISTS "{ingestion_table}" CASCADE')
+        for stmt in ddl.split(";\n"):
+            stmt = stmt.strip()
+            if stmt:
+                cur.execute(stmt)
+        cur.execute(
+            "SELECT column_name FROM information_schema.columns"
+            " WHERE table_name = %s AND table_schema = 'public'"
+            " ORDER BY ordinal_position",
+            (ingestion_table,),
+        )
+        ordered_columns = [row[0] for row in cur.fetchall()]
+    conn.commit()
+    return ordered_columns
+
+
+def _download_csv_strip_header(csv_url: str, dest_path: str) -> int:
+    row_count = 0
+    with requests.get(f"{BASE_URL}{csv_url}", stream=True) as resp:
+        resp.raise_for_status()
+        with open(dest_path, "wb") as f:
+            for i, line in enumerate(resp.iter_lines()):
+                if i < 6:
+                    continue
+                f.write(line + b"\n")
+                row_count += 1
+    return row_count
+
+
+def _copy_csv_to_table(conn, ingestion_table: str, columns: list[str], csv_path: str) -> None:
+    col_list = ", ".join(f'"{c}"' for c in columns)
+    sql = f'COPY "{ingestion_table}" ({col_list}) FROM STDIN WITH (FORMAT CSV, QUOTE \'"\');'
+    with open(csv_path, "rb") as f:
+        with conn.cursor() as cur:
+            cur.copy_expert(sql, f)
+    conn.commit()
+
+
+def _swap_tables(conn, ingestion_table: str) -> None:
+    target = ingestion_table.removesuffix("_ingestion")
+    drop_target = f"drop_{target}"
+    with conn.cursor() as cur:
+        cur.execute(f'ALTER TABLE IF EXISTS "{target}" RENAME TO "{drop_target}"')
+        cur.execute(f'ALTER TABLE "{ingestion_table}" RENAME TO "{target}"')
+    conn.commit()
+    with conn.cursor() as cur:
+        cur.execute(f'DROP TABLE IF EXISTS "{drop_target}"')
+    conn.commit()
+
+
+def _upsert_version(conn, snake_name: str, version: str) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE aws_pricing_list_versions SET version = %s WHERE name = %s",
+            (version, snake_name),
+        )
+        if cur.rowcount == 0:
+            cur.execute(
+                "INSERT INTO aws_pricing_list_versions (name, version) VALUES (%s, %s)",
+                (snake_name, version),
+            )
+    conn.commit()
+
+
+def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
+    name = rows[0]["name"]
+    snake_name = to_snake_case(name)
+    ingestion_table = f"{snake_name}_ingestion"
+    regions_loaded = 0
+
+    conn = _get_db_conn()
+    try:
+        version = rows[0]["csv_url"].split("/")[5]
+        columns = _create_ingestion_table(conn, ingestion_table, rows[0]["csv_url"], version)
+        print(f"[TABLE] created {ingestion_table}", file=sys.stderr)
+
+        seen_versions: set[str] = set()
+        for row in rows:
+            csv_url = row["csv_url"]
+            region = row["region"]
+            row_version = csv_url.split("/")[5]
+            tmp_path = None
+            try:
+                with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
+                    tmp_path = tmp.name
+                count = _download_csv_strip_header(csv_url, tmp_path)
+                _copy_csv_to_table(conn, ingestion_table, columns, tmp_path)
+                print(f"[COPY] {name}/{region} → {ingestion_table} ({count} rows)", file=sys.stderr)
+                regions_loaded += 1
+                seen_versions.add(row_version)
+            except Exception as e:
+                conn.rollback()
+                print(f"[ERROR] {name}/{region}: {e}", file=sys.stderr)
+            finally:
+                if tmp_path and os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+
+        if regions_loaded > 0:
+            _swap_tables(conn, ingestion_table)
+            print(f"[SWAP] {ingestion_table} → {snake_name}", file=sys.stderr)
+            for v in seen_versions:
+                _upsert_version(conn, snake_name, v)
+                print(f"[VERSION] {snake_name} = {v}", file=sys.stderr)
+        else:
+            print(f"[SKIP] {name}: no regions loaded successfully", file=sys.stderr)
+    finally:
+        conn.close()
+
+    return snake_name, regions_loaded
+
+
+def load_pricing_data(name_filter: str | None = None) -> None:
     start = time.time()
-    all_urls = get_all_pricing_urls()
+    known_versions = load_known_versions()
+
+    services = get_service_region_index_urls()
+    all_rows: list[dict] = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {
+            executor.submit(fetch_service_pricing_urls, s["service"], s["region_index_path"], known_versions): s["service"]
+            for s in services
+        }
+        for future in as_completed(futures):
+            all_rows.extend(future.result())
+
+    for path in SAVINGS_PLAN_REGION_INDEX_PATHS:
+        all_rows.extend(fetch_savings_plan_pricing_urls(path, known_versions))
+
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for row in all_rows:
+        if name_filter is None or row["name"] == name_filter:
+            groups[row["name"]].append(row)
+
+    if not groups:
+        print("[INFO] Nothing new to load.", file=sys.stderr)
+        return
+
+    total_regions = 0
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(_process_pricing_group, rows): name for name, rows in groups.items()}
+        for future in as_completed(futures):
+            try:
+                _, count = future.result()
+                total_regions += count
+            except Exception as e:
+                print(f"[ERROR] group failed: {e}", file=sys.stderr)
+
     elapsed = time.time() - start
+    print(f"\n# Loaded {total_regions} regions across {len(groups)} services in {elapsed:.2f}s", file=sys.stderr)
 
-    schema_start = time.time()
-    generate_missing_schemas(all_urls)
-    schema_elapsed = time.time() - schema_start
 
-    print("type,name,region,csv_url,publication_date")
-    for row in all_urls:
-        print(f"{row['type']},{row['name']},{row['region']},{BASE_URL}{row['csv_url']},{row['publication_date']}")
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--load", action="store_true", help="Load pricing data into PostgreSQL")
+    parser.add_argument("--name", default=None, help="Filter by service/plan name (e.g. AWSDatabaseSavingsPlans)")
+    args = parser.parse_args()
 
-    service_count = sum(1 for r in all_urls if r["type"] == "service")
-    sp_count = sum(1 for r in all_urls if r["type"] == "savings_plan")
-    print(f"\n# Total: {len(all_urls)} rows ({service_count} service, {sp_count} savings_plan) in {elapsed:.2f}s (index) {schema_elapsed:.2f}s (schema)", file=sys.stderr)
+    if args.load:
+        load_pricing_data(name_filter=args.name)
+    else:
+        start = time.time()
+        all_urls = get_all_pricing_urls()
+        elapsed = time.time() - start
+
+        schema_start = time.time()
+        generate_missing_schemas(all_urls)
+        schema_elapsed = time.time() - schema_start
+
+        print("type,name,region,csv_url,publication_date")
+        for row in all_urls:
+            print(f"{row['type']},{row['name']},{row['region']},{BASE_URL}{row['csv_url']},{row['publication_date']}")
+
+        service_count = sum(1 for r in all_urls if r["type"] == "service")
+        sp_count = sum(1 for r in all_urls if r["type"] == "savings_plan")
+        print(f"\n# Total: {len(all_urls)} rows ({service_count} service, {sp_count} savings_plan) in {elapsed:.2f}s (index) {schema_elapsed:.2f}s (schema)", file=sys.stderr)
