@@ -81,6 +81,29 @@ To force schema regeneration, delete the corresponding `.sql` file and re-run in
 
 ## Testing
 
+### Unit and API tests
+
+No database or network connection required:
+
+```bash
+pytest tests/
+```
+
+Covers:
+- `tests/test_aws_client.py` — `to_snake_case` with real AWS service names
+- `tests/test_schema_builder.py` — column type overrides, index name truncation, DDL generation
+- `tests/test_api.py` — all three endpoints via FastAPI `TestClient` with mocked service layer
+
+### Integration tests
+
+Requires a running PostgreSQL instance (`.env` configured):
+
+```bash
+pytest test_create_table.py
+```
+
+### Manual smoke tests
+
 Smoke test a savings plan:
 
 ```bash

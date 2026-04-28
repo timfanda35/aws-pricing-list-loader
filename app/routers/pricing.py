@@ -45,7 +45,7 @@ def list_pricing_urls():
 
 
 @router.post("/load", response_model=LoadResult)
-def trigger_load(body: LoadRequest = None):
+def trigger_load(body: LoadRequest | None = None):
     name_filter = body.name if body else None
     result = load_pricing_data(name_filter=name_filter)
     return LoadResult(**result)

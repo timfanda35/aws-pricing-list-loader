@@ -11,6 +11,12 @@ pip install -r requirements.txt
 # Start the API server
 uvicorn app.main:app --reload
 
+# Run unit and API tests (no DB or network required)
+pytest tests/
+
+# Run integration tests (requires live PostgreSQL)
+pytest test_create_table.py
+
 # CLI — list all pricing URLs and generate missing schema files
 python fetch_pricing_index.py
 
