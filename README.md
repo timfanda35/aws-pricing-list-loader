@@ -15,6 +15,28 @@ docker compose up --build -d
 
 Starts both PostgreSQL and the API. The API container automatically creates the `aws_pricing_list_versions` table on first start. Interactive docs at `http://localhost:8000/docs`.
 
+### Docker with SSL (GCP Cloud SQL or local mTLS test)
+
+For GCP Cloud SQL, download `server-ca.pem`, `client-cert.pem`, and `client-key.pem` from the Console → Cloud SQL → your instance → Connections → SSL, and place them in `certs/`.
+
+For local testing, generate self-signed equivalents instead:
+
+```bash
+bash scripts/gen-dev-certs.sh           # creates certs/ with matching file names
+docker compose -f docker-compose.yml -f docker-compose.ssl.yml up --build -d
+```
+
+The SSL compose override enables TLS on the PostgreSQL container and injects these env vars into `api`:
+
+| Env var | Value (in container) |
+|---|---|
+| `POSTGRES_SSL_MODE` | `verify-ca` |
+| `POSTGRES_SSL_ROOTCERT` | `/app/certs/server-ca.pem` |
+| `POSTGRES_SSL_CERT` | `/app/certs/client-cert.pem` |
+| `POSTGRES_SSL_KEY` | `/app/certs/client-key.pem` |
+
+For local dev without Docker, set these vars in `.env` pointing to your local cert paths.
+
 ### Local development
 
 ```bash

@@ -32,6 +32,10 @@ python fetch_pricing_index.py --load --name AWSDatabaseSavingsPlans
 # Docker — build and start the full stack (DB + API)
 docker compose up --build -d
 
+# Docker — with SSL/mTLS (local dev or GCP Cloud SQL)
+bash scripts/gen-dev-certs.sh  # one-time; re-run after docker compose down -v
+docker compose -f docker-compose.yml -f docker-compose.ssl.yml up --build -d
+
 # Docker — view logs
 docker compose logs -f api
 
@@ -39,7 +43,7 @@ docker compose logs -f api
 docker compose down
 ```
 
-PostgreSQL connection is configured via env vars (see `.env.example`): `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`. Managed by `app/config.py` using `pydantic-settings`.
+PostgreSQL connection is configured via env vars (see `.env.example`): `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`. Optional SSL vars: `POSTGRES_SSL_MODE`, `POSTGRES_SSL_ROOTCERT`, `POSTGRES_SSL_CERT`, `POSTGRES_SSL_KEY`. Managed by `app/config.py` using `pydantic-settings`.
 
 ## Architecture
 
@@ -103,6 +107,8 @@ app/
 |------|---------|
 | `Dockerfile` | Multi-stage build: builder installs deps into `/opt/venv`; runtime stage copies venv + app, runs as non-root `appuser` |
 | `docker-entrypoint.sh` | Runs `create_table.py` (idempotent) then `exec`s uvicorn for signal-safe startup |
+| `docker-compose.ssl.yml` | Compose override: enables SSL on the `db` service and mounts `certs/` into `api`; use with `-f docker-compose.yml -f docker-compose.ssl.yml` |
+| `scripts/gen-dev-certs.sh` | Generates self-signed CA + server + client certs in `certs/` for local SSL testing; file names match GCP Cloud SQL's download naming |
 | `.dockerignore` | Excludes `.env`, `schema/`, `tests/`, dev files from the image |
 | `requirements.txt` | Runtime-only pinned deps (used by Dockerfile) |
 | `requirements-dev.txt` | Runtime + dev/test deps (pytest, httpx); used for local development |

@@ -1,0 +1,23 @@
+services:
+  db:
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "install -Dm600 -o999 -g999 /run/pg-certs/server-key.pem /etc/pg-tls/server.key &&
+       install -Dm644 -o999 -g999 /run/pg-certs/server-cert.pem /etc/pg-tls/server.crt &&
+       install -Dm644 -o999 -g999 /run/pg-certs/server-ca.pem   /etc/pg-tls/root.crt &&
+       exec docker-entrypoint.sh postgres
+         -c ssl=on
+         -c ssl_cert_file=/etc/pg-tls/server.crt
+         -c ssl_key_file=/etc/pg-tls/server.key
+         -c ssl_ca_file=/etc/pg-tls/root.crt"
+    volumes:
+      - ./certs:/run/pg-certs:ro
+
+  api:
+    volumes:
+      - ./certs:/app/certs:ro
+    environment:
+      - POSTGRES_SSL_MODE=verify-ca
+      - POSTGRES_SSL_ROOTCERT=/app/certs/server-ca.pem
+      - POSTGRES_SSL_CERT=/app/certs/client-cert.pem
+      - POSTGRES_SSL_KEY=/app/certs/client-key.pem
