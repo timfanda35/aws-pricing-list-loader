@@ -1,25 +1,11 @@
 import sys
 
-from app.database import get_db_conn
-
-_CREATE_TABLE_SQL = """
-CREATE TABLE IF NOT EXISTS aws_pricing_list_versions (
-    id      SERIAL PRIMARY KEY,
-    name    TEXT,
-    version TEXT
-);
-"""
+from app.migrations import run_migrations
 
 
 def main():
-    conn = get_db_conn()
-    try:
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(_CREATE_TABLE_SQL)
-        print("Table 'aws_pricing_list_versions' created (or already exists).")
-    finally:
-        conn.close()
+    run_migrations()
+    print("Migrations complete.")
 
 
 if __name__ == "__main__":
