@@ -26,6 +26,7 @@ RUN groupadd --system appuser && useradd --system --gid appuser appuser
 COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 
 COPY app/ ./app/
+COPY migrations/ ./migrations/
 COPY create_table.py fetch_pricing_index.py docker-entrypoint.sh ./
 
 RUN mkdir -p schema && chown -R appuser:appuser /app

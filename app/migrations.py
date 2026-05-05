@@ -1,6 +1,9 @@
+import logging
 from pathlib import Path
 
 from app.database import get_db_conn
+
+logger = logging.getLogger(__name__)
 
 MIGRATIONS_DIR = Path(__file__).parent.parent / "migrations"
 
@@ -25,14 +28,15 @@ def run_migrations():
                 cur.execute(_GET_APPLIED_SQL)
                 applied = {row[0] for row in cur.fetchall()}
 
-        for sql_file in sorted(MIGRATIONS_DIR.glob("*.sql")):
-            if sql_file.name in applied:
-                continue
+        pending = [f for f in sorted(MIGRATIONS_DIR.glob("*.sql")) if f.name not in applied]
+        logger.info("Migrations: %d pending", len(pending))
+        for sql_file in pending:
             sql = sql_file.read_text()
             with conn:
                 with conn.cursor() as cur:
                     cur.execute(sql)
                     cur.execute(_RECORD_MIGRATION_SQL, (sql_file.name,))
-            print(f"Applied migration: {sql_file.name}")
+            logger.info("Applied migration: %s", sql_file.name)
+        logger.info("Migrations complete.")
     finally:
         conn.close()
