@@ -49,7 +49,7 @@ def build_schema_sql(table: str, columns: list[str], version: str) -> str:
     col_defs = ',\n'.join(_column_definition(c) for c in columns)
     ddl = f"CREATE TABLE IF NOT EXISTS {table} (\n{col_defs}\n);"
     index_lines = [
-        f"CREATE INDEX {_index_name(table, version, col)} ON {table} ({col});"
+        f"CREATE INDEX IF NOT EXISTS {_index_name(table, version, col)} ON {table} ({col});"
         for col in columns if col in _INDEX_COLUMNS
     ]
     return '\n'.join([ddl] + index_lines) + '\n'
