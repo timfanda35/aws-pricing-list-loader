@@ -46,6 +46,22 @@ docker compose up -d db  # start Postgres only
 uvicorn app.main:app --reload  # migrations run automatically on startup
 ```
 
+## Environment variables
+
+All vars are read from `.env` (or the shell environment). Copy `.env.example` to get started.
+
+| Variable | Default | Required | Description |
+|---|---|---|---|
+| `POSTGRES_HOST` | — | Yes | PostgreSQL host |
+| `POSTGRES_PORT` | `5432` | No | PostgreSQL port |
+| `POSTGRES_DB` | — | Yes | Database name |
+| `POSTGRES_USER` | — | Yes | Database user |
+| `POSTGRES_PASSWORD` | — | Yes | Database password |
+| `POSTGRES_SSL_MODE` | — | No | SSL mode (e.g. `verify-ca`); omit for plain TCP |
+| `POSTGRES_SSL_ROOTCERT` | — | No | Path to server CA cert |
+| `POSTGRES_SSL_CERT` | — | No | Path to client cert |
+| `POSTGRES_SSL_KEY` | — | No | Path to client private key |
+
 ## API
 
 | Method | Path | Description |
