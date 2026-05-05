@@ -39,7 +39,7 @@ def get_service_region_index_urls() -> list[dict]:
 def fetch_service_pricing_urls(
     service: str,
     region_index_path: str,
-    known_versions: frozenset[tuple[str, str]] = frozenset(),
+    known_versions: frozenset[tuple[str, str]] | None = frozenset(),
 ) -> list[dict]:
     try:
         region_index = fetch_json(region_index_path)
@@ -54,7 +54,7 @@ def fetch_service_pricing_urls(
         json_url = region_data["currentVersionUrl"]
         csv_url = json_url.replace(".json", ".csv")
         version = csv_url.split("/")[5]
-        if (snake_name, version) in known_versions:
+        if known_versions is not None and (snake_name, version) in known_versions:
             print(
                 f"[SKIP] {service}/{region_code} version {version} already in aws_pricing_list_versions",
                 file=sys.stderr,
@@ -73,7 +73,7 @@ def fetch_service_pricing_urls(
 
 def fetch_savings_plan_pricing_urls(
     region_index_path: str,
-    known_versions: frozenset[tuple[str, str]] = frozenset(),
+    known_versions: frozenset[tuple[str, str]] | None = frozenset(),
 ) -> list[dict]:
     plan_name = region_index_path.split("/")[4]
     try:
@@ -89,7 +89,7 @@ def fetch_savings_plan_pricing_urls(
         json_url = region_data["versionUrl"]
         csv_url = json_url.replace(".json", ".csv")
         version = csv_url.split("/")[5]
-        if (snake_name, version) in known_versions:
+        if known_versions is not None and (snake_name, version) in known_versions:
             print(
                 f"[SKIP] {plan_name}/{region_data['regionCode']} version {version} already in aws_pricing_list_versions",
                 file=sys.stderr,
@@ -106,7 +106,7 @@ def fetch_savings_plan_pricing_urls(
     return results
 
 
-def get_all_pricing_urls(known_versions: frozenset[tuple[str, str]] = frozenset()) -> list[dict]:
+def get_all_pricing_urls(known_versions: frozenset[tuple[str, str]] | None = frozenset()) -> list[dict]:
     services = get_service_region_index_urls()
 
     results = []
