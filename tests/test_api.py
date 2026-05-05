@@ -73,13 +73,25 @@ class TestTriggerLoad:
         mock_result = {"loaded": 100, "services": 10, "elapsed_seconds": 60.0}
         with patch("app.routers.pricing.load_pricing_data", return_value=mock_result) as mock_fn:
             client.post("/pricing/load")
-        mock_fn.assert_called_once_with(name_filter=None)
+        mock_fn.assert_called_once_with(name_filter=None, force=False)
 
     def test_name_filter_passed_to_service(self):
         mock_result = {"loaded": 14, "services": 1, "elapsed_seconds": 5.0}
         with patch("app.routers.pricing.load_pricing_data", return_value=mock_result) as mock_fn:
             client.post("/pricing/load", json={"name": "comprehend"})
-        mock_fn.assert_called_once_with(name_filter="comprehend")
+        mock_fn.assert_called_once_with(name_filter="comprehend", force=False)
+
+    def test_force_true_passed_to_service(self):
+        mock_result = {"loaded": 14, "services": 1, "elapsed_seconds": 5.0}
+        with patch("app.routers.pricing.load_pricing_data", return_value=mock_result) as mock_fn:
+            client.post("/pricing/load", json={"force": True})
+        mock_fn.assert_called_once_with(name_filter=None, force=True)
+
+    def test_force_with_name_filter(self):
+        mock_result = {"loaded": 14, "services": 1, "elapsed_seconds": 5.0}
+        with patch("app.routers.pricing.load_pricing_data", return_value=mock_result) as mock_fn:
+            client.post("/pricing/load", json={"name": "comprehend", "force": True})
+        mock_fn.assert_called_once_with(name_filter="comprehend", force=True)
 
     def test_nothing_loaded_returns_zeros(self):
         mock_result = {"loaded": 0, "services": 0, "elapsed_seconds": 0.5}

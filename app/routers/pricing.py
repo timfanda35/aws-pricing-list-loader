@@ -16,6 +16,7 @@ class PricingUrl(BaseModel):
 
 class LoadRequest(BaseModel):
     name: str | None = None
+    force: bool | None = None
 
 
 class LoadResult(BaseModel):
@@ -47,5 +48,6 @@ def list_pricing_urls():
 @router.post("/load", response_model=LoadResult)
 def trigger_load(body: LoadRequest | None = None):
     name_filter = body.name if body else None
-    result = load_pricing_data(name_filter=name_filter)
+    force = bool(body and body.force)
+    result = load_pricing_data(name_filter=name_filter, force=force)
     return LoadResult(**result)
