@@ -13,7 +13,7 @@ cp .env.example .env  # fill in Postgres credentials
 docker compose up --build -d
 ```
 
-Starts both PostgreSQL and the API. The API container automatically creates the `aws_pricing_list_versions` table on first start. Interactive docs at `http://localhost:8000/docs`.
+Starts both PostgreSQL and the API. The API automatically runs any pending DB migrations on startup. Interactive docs at `http://localhost:8000/docs`.
 
 ### Docker with SSL (GCP Cloud SQL or local mTLS test)
 
@@ -43,8 +43,7 @@ For local dev without Docker, set these vars in `.env` pointing to your local ce
 pip install -r requirements-dev.txt
 cp .env.example .env  # fill in Postgres credentials
 docker compose up -d db  # start Postgres only
-python create_table.py   # create aws_pricing_list_versions table
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload  # migrations run automatically on startup
 ```
 
 ## API
@@ -106,6 +105,22 @@ Schema files in `schema/` are generated during URL listing (both CLI listing mod
 
 To force schema regeneration, delete the corresponding `.sql` file and re-run in listing mode.
 
+## Migrations
+
+DB migrations live in `migrations/` as numbered SQL files (`0001_*.sql`, `0002_*.sql`, …). They are applied automatically in filename order every time the API starts. Applied migrations are tracked in the `schema_migrations` table so each file runs exactly once.
+
+To add a migration:
+
+```bash
+# Create the file
+echo "ALTER TABLE aws_pricing_list_versions ADD COLUMN IF NOT EXISTS notes TEXT;" \
+  > migrations/0002_add_notes_column.sql
+
+# Deploy — runs on next startup
+uvicorn app.main:app
+# Log: Applied migration: 0002_add_notes_column.sql
+```
+
 ## Testing
 
 ### Unit and API tests
@@ -120,7 +135,9 @@ pytest tests/
 Covers:
 - `tests/test_aws_client.py` — `to_snake_case` with real AWS service names
 - `tests/test_schema_builder.py` — column type overrides, index name truncation, DDL generation
-- `tests/test_api.py` — all three endpoints via FastAPI `TestClient` with mocked service layer
+- `tests/test_api.py` — all endpoints via FastAPI `TestClient` with mocked service layer
+- `tests/test_migrations.py` — migration runner: ordering, skip-applied, connection cleanup
+- `tests/test_main.py` — lifespan calls `run_migrations()` on startup
 
 ### Integration tests
 

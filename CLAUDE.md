@@ -51,9 +51,10 @@ A FastAPI HTTP service backed by a modular service layer. The CLI (`fetch_pricin
 
 ```
 app/
-├── main.py              # FastAPI app + router registration
+├── main.py              # FastAPI app + lifespan (runs migrations on startup)
 ├── config.py            # pydantic-settings Settings (env vars)
 ├── database.py          # psycopg2 connection factory
+├── migrations.py        # run_migrations() — applies versioned SQL files in migrations/
 ├── routers/
 │   ├── pricing.py       # GET /pricing/urls, POST /pricing/load
 │   └── versions.py      # GET /versions
@@ -61,6 +62,9 @@ app/
     ├── aws_client.py    # AWS Pricing API fetching, to_snake_case, BASE_URL
     ├── schema_builder.py# DDL generation, generate_missing_schemas
     └── loader.py        # Ingestion/swap logic, load_pricing_data
+
+migrations/              # Versioned SQL migration files, applied in filename order
+└── 0001_create_versions_table.sql
 ```
 
 ## API Endpoints
@@ -95,6 +99,15 @@ app/
 - `sku`, `region_code`, `discounted_region_code` get indexes; index names are capped at 63 chars (PostgreSQL limit) with MD5 hash suffix if needed
 - In load mode, DDL is executed directly to the DB; in listing mode, DDL is written to `schema/`
 
+## DB Migrations
+
+Migrations live in `migrations/` as numbered SQL files (`0001_*.sql`, `0002_*.sql`, …). `run_migrations()` in `app/migrations.py` applies them on FastAPI startup via the `lifespan` context manager.
+
+- Applied migrations are tracked in the `schema_migrations` table (created automatically on first run).
+- Each file is applied exactly once; subsequent startups skip already-applied files.
+- To add a migration: create `migrations/NNNN_description.sql` and deploy — it runs on the next startup.
+- `create_table.py` delegates to `run_migrations()` for manual or scripted use.
+
 ## Key Constants
 
 - `BASE_URL` — `https://pricing.us-east-1.amazonaws.com` (in `app/services/aws_client.py`)
@@ -106,7 +119,7 @@ app/
 | File | Purpose |
 |------|---------|
 | `Dockerfile` | Multi-stage build: builder installs deps into `/opt/venv`; runtime stage copies venv + app, runs as non-root `appuser` |
-| `docker-entrypoint.sh` | Runs `create_table.py` (idempotent) then `exec`s uvicorn for signal-safe startup |
+| `docker-entrypoint.sh` | `exec`s uvicorn for signal-safe startup; migrations run via FastAPI lifespan |
 | `docker-compose.ssl.yml` | Compose override: enables SSL on the `db` service and mounts `certs/` into `api`; use with `-f docker-compose.yml -f docker-compose.ssl.yml` |
 | `scripts/gen-dev-certs.sh` | Generates self-signed CA + server + client certs in `certs/` for local SSL testing; file names match GCP Cloud SQL's download naming |
 | `.dockerignore` | Excludes `.env`, `schema/`, `tests/`, dev files from the image |
