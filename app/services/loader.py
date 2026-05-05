@@ -153,9 +153,9 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
     return snake_name, regions_loaded
 
 
-def load_pricing_data(name_filter: str | None = None) -> dict:
+def load_pricing_data(name_filter: str | None = None, force: bool = False) -> dict:
     start = time.time()
-    known_versions = load_known_versions()
+    known_versions = None if force else load_known_versions()
     all_rows = get_all_pricing_urls(known_versions)
 
     groups: dict[str, list[dict]] = defaultdict(list)
