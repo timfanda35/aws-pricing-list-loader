@@ -174,8 +174,8 @@ class TestProcessPricingGroupColumnUnion:
              patch("app.services.loader._copy_csv_to_table"), \
              patch("app.services.loader._swap_tables"), \
              patch("app.services.loader._upsert_version"), \
-             patch("tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
-             patch("os.path.exists", return_value=False):
+             patch("app.services.loader.tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("app.services.loader.os.path.exists", return_value=False):
             _process_pricing_group(rows)
 
         assert call_order.index("fetch") < call_order.index("create")
@@ -191,8 +191,8 @@ class TestProcessPricingGroupColumnUnion:
              patch("app.services.loader._copy_csv_to_table"), \
              patch("app.services.loader._swap_tables"), \
              patch("app.services.loader._upsert_version"), \
-             patch("tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
-             patch("os.path.exists", return_value=False):
+             patch("app.services.loader.tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("app.services.loader.os.path.exists", return_value=False):
             _process_pricing_group(rows)
 
         # positional: conn, table, columns, version
@@ -215,8 +215,31 @@ class TestProcessPricingGroupColumnUnion:
              patch("app.services.loader._copy_csv_to_table", side_effect=mock_copy), \
              patch("app.services.loader._swap_tables"), \
              patch("app.services.loader._upsert_version"), \
-             patch("tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
-             patch("os.path.exists", return_value=False):
+             patch("app.services.loader.tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("app.services.loader.os.path.exists", return_value=False):
             _process_pricing_group(rows)
 
         assert copy_cols_used == [["rate_code", "sku"]]
+
+    def test_copy_falls_back_to_full_columns_when_url_missing_from_per_url(self):
+        rows = [{"csv_url": "/offers/v1.0/aws/svc/20260101/us-east-1/index.csv", "name": "svc", "region": "us-east-1"}]
+        unioned = ["rate_code", "sku", "extra"]
+        per_url = {}  # URL absent from per_url (simulates failed header fetch for this URL)
+
+        copy_cols_used = []
+
+        def mock_copy(conn, table, cols, path):
+            copy_cols_used.append(cols)
+
+        with patch("app.services.loader.get_db_conn"), \
+             patch("app.services.loader._fetch_all_columns", return_value=(unioned, per_url)), \
+             patch("app.services.loader._create_ingestion_table", return_value=unioned), \
+             patch("app.services.loader._download_csv_strip_header", return_value=1), \
+             patch("app.services.loader._copy_csv_to_table", side_effect=mock_copy), \
+             patch("app.services.loader._swap_tables"), \
+             patch("app.services.loader._upsert_version"), \
+             patch("app.services.loader.tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("app.services.loader.os.path.exists", return_value=False):
+            _process_pricing_group(rows)
+
+        assert copy_cols_used == [unioned]
