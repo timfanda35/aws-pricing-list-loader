@@ -149,7 +149,8 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
     conn = get_db_conn()
     try:
         version = rows[0]["csv_url"].split("/")[5]
-        columns = _create_ingestion_table(conn, ingestion_table, rows[0]["csv_url"], version)
+        unioned_columns, per_url_columns = _fetch_all_columns(rows)
+        columns = _create_ingestion_table(conn, ingestion_table, unioned_columns, version)
         print(f"[TABLE] created {ingestion_table}", file=sys.stderr)
 
         seen_versions: set[str] = set()
@@ -162,7 +163,8 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
                 with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
                     tmp_path = tmp.name
                 count = _download_csv_strip_header(csv_url, tmp_path)
-                _copy_csv_to_table(conn, ingestion_table, columns, tmp_path)
+                url_columns = per_url_columns.get(csv_url, columns)
+                _copy_csv_to_table(conn, ingestion_table, url_columns, tmp_path)
                 print(f"[COPY] {name}/{region} → {ingestion_table} ({count} rows)", file=sys.stderr)
                 regions_loaded += 1
                 seen_versions.add(row_version)

@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
+import os
 
-from app.services.loader import load_pricing_data, _create_ingestion_table, _fetch_all_columns
+from app.services.loader import load_pricing_data, _create_ingestion_table, _fetch_all_columns, _process_pricing_group
 from app.services.aws_client import BASE_URL
 
 
@@ -137,3 +138,85 @@ class TestFetchAllColumns:
         unioned, per_url = _fetch_all_columns([])
         assert unioned == []
         assert per_url == {}
+
+
+class TestProcessPricingGroupColumnUnion:
+    def _make_tmp(self, name="/tmp/test.csv"):
+        mock_tmp = MagicMock()
+        mock_tmp.__enter__ = MagicMock(return_value=mock_tmp)
+        mock_tmp.__exit__ = MagicMock(return_value=False)
+        mock_tmp.name = name
+        return mock_tmp
+
+    # Realistic AWS CSV URL pattern: /offers/v1.0/aws/{service}/{version}/...
+    _URL_A = "/offers/v1.0/aws/svc/20260101/us-east-1/index.csv"
+    _URL_B = "/offers/v1.0/aws/svc/20260101/us-west-2/index.csv"
+
+    def test_fetch_all_columns_called_before_create_ingestion_table(self):
+        rows = [
+            {"csv_url": self._URL_A, "name": "svc", "region": "us-east-1"},
+            {"csv_url": self._URL_B, "name": "svc", "region": "us-west-2"},
+        ]
+        call_order = []
+
+        def mock_fetch(rows):
+            call_order.append("fetch")
+            return ["rate_code", "sku"], {self._URL_A: ["rate_code", "sku"], self._URL_B: ["rate_code", "sku"]}
+
+        def mock_create(conn, table, cols, version):
+            call_order.append("create")
+            return cols
+
+        with patch("app.services.loader.get_db_conn"), \
+             patch("app.services.loader._fetch_all_columns", side_effect=mock_fetch), \
+             patch("app.services.loader._create_ingestion_table", side_effect=mock_create), \
+             patch("app.services.loader._download_csv_strip_header", return_value=1), \
+             patch("app.services.loader._copy_csv_to_table"), \
+             patch("app.services.loader._swap_tables"), \
+             patch("app.services.loader._upsert_version"), \
+             patch("tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("os.path.exists", return_value=False):
+            _process_pricing_group(rows)
+
+        assert call_order.index("fetch") < call_order.index("create")
+
+    def test_create_ingestion_table_called_with_unioned_columns(self):
+        rows = [{"csv_url": self._URL_A, "name": "svc", "region": "us-east-1"}]
+        unioned = ["rate_code", "sku", "extra"]
+
+        with patch("app.services.loader.get_db_conn"), \
+             patch("app.services.loader._fetch_all_columns", return_value=(unioned, {self._URL_A: ["rate_code", "sku"]})), \
+             patch("app.services.loader._create_ingestion_table", return_value=unioned) as mock_create, \
+             patch("app.services.loader._download_csv_strip_header", return_value=1), \
+             patch("app.services.loader._copy_csv_to_table"), \
+             patch("app.services.loader._swap_tables"), \
+             patch("app.services.loader._upsert_version"), \
+             patch("tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("os.path.exists", return_value=False):
+            _process_pricing_group(rows)
+
+        # positional: conn, table, columns, version
+        assert mock_create.call_args[0][2] == unioned
+
+    def test_copy_uses_per_url_columns_not_unioned(self):
+        rows = [{"csv_url": self._URL_A, "name": "svc", "region": "us-east-1"}]
+        unioned = ["rate_code", "sku", "extra"]
+        per_url = {self._URL_A: ["rate_code", "sku"]}
+
+        copy_cols_used = []
+
+        def mock_copy(conn, table, cols, path):
+            copy_cols_used.append(cols)
+
+        with patch("app.services.loader.get_db_conn"), \
+             patch("app.services.loader._fetch_all_columns", return_value=(unioned, per_url)), \
+             patch("app.services.loader._create_ingestion_table", return_value=unioned), \
+             patch("app.services.loader._download_csv_strip_header", return_value=1), \
+             patch("app.services.loader._copy_csv_to_table", side_effect=mock_copy), \
+             patch("app.services.loader._swap_tables"), \
+             patch("app.services.loader._upsert_version"), \
+             patch("tempfile.NamedTemporaryFile", return_value=self._make_tmp()), \
+             patch("os.path.exists", return_value=False):
+            _process_pricing_group(rows)
+
+        assert copy_cols_used == [["rate_code", "sku"]]
