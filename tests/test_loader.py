@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 from app.services.loader import load_pricing_data, _create_ingestion_table
 
@@ -60,7 +60,9 @@ class TestCreateIngestionTable:
         mock_build.assert_called_once_with("t_ingestion", ["rate_code", "sku"], "20260101")
 
     def test_returns_ordered_columns_from_db(self):
-        conn, cur = self._make_conn(["rate_code", "sku"])
+        # DB returns columns in a different order than the input to confirm the
+        # return value comes from the DB query, not the input list.
+        conn, cur = self._make_conn(["sku", "rate_code"])
         with patch("app.services.loader.build_schema_sql", return_value="CREATE TABLE t;"):
             result = _create_ingestion_table(conn, "t_ingestion", ["rate_code", "sku"], "20260101")
-        assert result == ["rate_code", "sku"]
+        assert result == ["sku", "rate_code"]
