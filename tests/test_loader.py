@@ -81,7 +81,8 @@ class TestFetchAllColumns:
         }
         with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]) as mock_get:
             _fetch_all_columns(rows)
-        assert mock_get.call_count == 2
+        mock_get.assert_any_call(f"{BASE_URL}/url/a.csv")
+        mock_get.assert_any_call(f"{BASE_URL}/url/b.csv")
 
     def test_returns_union_of_all_columns(self):
         rows = [
@@ -131,3 +132,8 @@ class TestFetchAllColumns:
             unioned, per_url = _fetch_all_columns(rows)
         assert unioned == ["rate_code", "sku"]
         assert per_url == {"/url/a.csv": ["rate_code", "sku"]}
+
+    def test_empty_rows_returns_empty(self):
+        unioned, per_url = _fetch_all_columns([])
+        assert unioned == []
+        assert per_url == {}

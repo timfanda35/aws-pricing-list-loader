@@ -64,16 +64,22 @@ def _create_ingestion_table(conn, ingestion_table: str, columns: list[str], vers
 
 
 def _fetch_all_columns(rows: list[dict]) -> tuple[list[str], dict[str, list[str]]]:
+    if not rows:
+        return [], {}
+
     per_url: dict[str, list[str]] = {}
 
     def fetch(csv_url: str) -> tuple[str, list[str]]:
         return csv_url, get_csv_column_names(f"{BASE_URL}{csv_url}")
 
     with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {executor.submit(fetch, row["csv_url"]): row["csv_url"] for row in rows}
+        futures = [executor.submit(fetch, row["csv_url"]) for row in rows]
         for future in as_completed(futures):
-            csv_url, cols = future.result()
-            per_url[csv_url] = cols
+            try:
+                csv_url, cols = future.result()
+                per_url[csv_url] = cols
+            except Exception as e:
+                print(f"[WARN] failed to fetch columns: {e}", file=sys.stderr)
 
     base = per_url.get(rows[0]["csv_url"], [])
     seen = set(base)
