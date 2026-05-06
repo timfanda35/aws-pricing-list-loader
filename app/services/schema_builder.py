@@ -47,9 +47,9 @@ def _index_name(table: str, version: str, col: str) -> str:
 
 def build_schema_sql(table: str, columns: list[str], version: str) -> str:
     col_defs = ',\n'.join(_column_definition(c) for c in columns)
-    ddl = f"CREATE TABLE IF NOT EXISTS {table} (\n{col_defs}\n);"
+    ddl = f'CREATE TABLE IF NOT EXISTS "{table}" (\n{col_defs}\n);'
     index_lines = [
-        f"CREATE INDEX IF NOT EXISTS {_index_name(table, version, col)} ON {table} ({col});"
+        f'CREATE INDEX IF NOT EXISTS {_index_name(table, version, col)} ON "{table}" ("{col}");'
         for col in columns if col in _INDEX_COLUMNS
     ]
     return '\n'.join([ddl] + index_lines) + '\n'
@@ -61,7 +61,7 @@ def generate_missing_schemas(all_urls: list[dict], schema_dir: Path = SCHEMA_DIR
     seen: dict[str, str] = {}
     for row in all_urls:
         name = row["name"]
-        table = f"{to_snake_case(name)}_ingestion"
+        table = f"{name}_ingestion"
         if not (schema_dir / f"{table}.sql").exists() and name not in seen:
             seen[name] = f"{BASE_URL}{row['csv_url']}"
 
@@ -69,23 +69,22 @@ def generate_missing_schemas(all_urls: list[dict], schema_dir: Path = SCHEMA_DIR
         return
 
     def _generate(name: str, csv_url: str) -> tuple[str, str, str, str]:
-        snake_name = to_snake_case(name)
-        table = f"{snake_name}_ingestion"
+        table = f"{name}_ingestion"
         version = csv_url[len(BASE_URL):].split("/")[5]
         columns = get_csv_column_names(csv_url)
-        return table, build_schema_sql(table, columns, version), snake_name, version
+        return table, build_schema_sql(table, columns, version), name, version
 
-    def _upsert(cur, snake_name: str, version: str) -> None:
+    def _upsert(cur, name: str, version: str) -> None:
         cur.execute(
             "UPDATE aws_pricing_list_versions SET version = %s WHERE name = %s",
-            (version, snake_name),
+            (version, name),
         )
         if cur.rowcount == 0:
             cur.execute(
                 "INSERT INTO aws_pricing_list_versions (name, version) VALUES (%s, %s)",
-                (snake_name, version),
+                (name, version),
             )
-        print(f"[DB] upserted aws_pricing_list_versions: name={snake_name} version={version}", file=sys.stderr)
+        print(f"[DB] upserted aws_pricing_list_versions: name={name} version={version}", file=sys.stderr)
 
     db_conn = None
     try:

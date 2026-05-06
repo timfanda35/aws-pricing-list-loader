@@ -48,13 +48,12 @@ def fetch_service_pricing_urls(
         return []
 
     publication_date = region_index.get("publicationDate", "")
-    snake_name = to_snake_case(service)
     results = []
     for region_code, region_data in region_index["regions"].items():
         json_url = region_data["currentVersionUrl"]
         csv_url = json_url.replace(".json", ".csv")
         version = csv_url.split("/")[5]
-        if known_versions is not None and (snake_name, version) in known_versions:
+        if known_versions is not None and (service, version) in known_versions:
             print(
                 f"[SKIP] {service}/{region_code} version {version} already in aws_pricing_list_versions",
                 file=sys.stderr,
@@ -83,13 +82,12 @@ def fetch_savings_plan_pricing_urls(
         return []
 
     publication_date = region_index.get("publicationDate", "")
-    snake_name = to_snake_case(plan_name)
     results = []
     for region_data in region_index["regions"]:
         json_url = region_data["versionUrl"]
         csv_url = json_url.replace(".json", ".csv")
         version = csv_url.split("/")[5]
-        if known_versions is not None and (snake_name, version) in known_versions:
+        if known_versions is not None and (plan_name, version) in known_versions:
             print(
                 f"[SKIP] {plan_name}/{region_data['regionCode']} version {version} already in aws_pricing_list_versions",
                 file=sys.stderr,

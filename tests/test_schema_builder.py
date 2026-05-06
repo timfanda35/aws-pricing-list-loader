@@ -56,7 +56,7 @@ class TestIndexName:
 class TestBuildSchemaSql:
     def test_creates_table_statement(self):
         sql = build_schema_sql("test_ingestion", ["sku", "rate_code"], "20260101")
-        assert "CREATE TABLE IF NOT EXISTS test_ingestion" in sql
+        assert 'CREATE TABLE IF NOT EXISTS "test_ingestion"' in sql
 
     def test_includes_all_columns(self):
         sql = build_schema_sql("test_ingestion", ["sku", "rate_code", "description"], "20260101")
@@ -67,15 +67,15 @@ class TestBuildSchemaSql:
     def test_creates_index_for_sku(self):
         sql = build_schema_sql("test_ingestion", ["sku", "rate_code"], "20260101")
         assert "CREATE INDEX" in sql
-        assert "ON test_ingestion (sku)" in sql
+        assert 'ON "test_ingestion" ("sku")' in sql
 
     def test_creates_index_for_region_code(self):
         sql = build_schema_sql("test_ingestion", ["rate_code", "region_code"], "20260101")
-        assert "ON test_ingestion (region_code)" in sql
+        assert 'ON "test_ingestion" ("region_code")' in sql
 
     def test_no_index_for_regular_columns(self):
         sql = build_schema_sql("test_ingestion", ["rate_code", "description"], "20260101")
-        assert "ON test_ingestion (description)" not in sql
+        assert 'ON "test_ingestion" ("description")' not in sql
 
     def test_applies_type_overrides(self):
         sql = build_schema_sql(
@@ -92,6 +92,6 @@ class TestBuildSchemaSql:
             ["rate_code", "sku", "region_code", "discounted_region_code"],
             "20260101",
         )
-        assert "ON test_ingestion (sku)" in sql
-        assert "ON test_ingestion (region_code)" in sql
-        assert "ON test_ingestion (discounted_region_code)" in sql
+        assert 'ON "test_ingestion" ("sku")' in sql
+        assert 'ON "test_ingestion" ("region_code")' in sql
+        assert 'ON "test_ingestion" ("discounted_region_code")' in sql

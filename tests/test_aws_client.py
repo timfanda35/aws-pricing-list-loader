@@ -17,6 +17,7 @@ from app.services.aws_client import (
     ("aws-comprehend", "aws_comprehend"),
     ("amazon_bedrock", "amazon_bedrock"),
     ("AmazonRDS", "amazon_rds"),
+    ("VMwareCloudOnAWS", "vmware_cloud_on_aws"),
 ])
 def test_to_snake_case(name, expected):
     assert to_snake_case(name) == expected
@@ -44,7 +45,7 @@ _SAVINGS_PLAN_REGION_INDEX = {
 
 class TestFetchServicePricingUrlsVersionCheck:
     def test_known_version_skipped_when_in_set(self):
-        known = frozenset([("amazon_ec2", "20240101")])
+        known = frozenset([("AmazonEC2", "20240101")])
         with patch("app.services.aws_client.fetch_json", return_value=_REGION_INDEX):
             results = fetch_service_pricing_urls("AmazonEC2", "/some/path", known)
         assert results == []
@@ -58,7 +59,7 @@ class TestFetchServicePricingUrlsVersionCheck:
 class TestFetchSavingsPlanPricingUrlsVersionCheck:
     def test_known_version_skipped_when_in_set(self):
         path = "/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/current/region_index.json"
-        known = frozenset([("aws_compute_savings_plan", "20240101")])
+        known = frozenset([("AWSComputeSavingsPlan", "20240101")])
         with patch("app.services.aws_client.fetch_json", return_value=_SAVINGS_PLAN_REGION_INDEX):
             results = fetch_savings_plan_pricing_urls(path, known)
         assert results == []

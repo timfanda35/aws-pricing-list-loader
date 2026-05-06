@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 from app.database import get_db_conn
-from app.services.aws_client import BASE_URL, get_all_pricing_urls, to_snake_case
+from app.services.aws_client import BASE_URL, get_all_pricing_urls
 from app.services.schema_builder import build_schema_sql, get_csv_column_names
 
 
@@ -92,24 +92,23 @@ def _swap_tables(conn, ingestion_table: str) -> None:
     conn.commit()
 
 
-def _upsert_version(conn, snake_name: str, version: str) -> None:
+def _upsert_version(conn, name: str, version: str) -> None:
     with conn.cursor() as cur:
         cur.execute(
             "UPDATE aws_pricing_list_versions SET version = %s WHERE name = %s",
-            (version, snake_name),
+            (version, name),
         )
         if cur.rowcount == 0:
             cur.execute(
                 "INSERT INTO aws_pricing_list_versions (name, version) VALUES (%s, %s)",
-                (snake_name, version),
+                (name, version),
             )
     conn.commit()
 
 
 def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
     name = rows[0]["name"]
-    snake_name = to_snake_case(name)
-    ingestion_table = f"{snake_name}_ingestion"
+    ingestion_table = f"{name}_ingestion"
     regions_loaded = 0
 
     conn = get_db_conn()
@@ -141,16 +140,16 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
 
         if regions_loaded > 0:
             _swap_tables(conn, ingestion_table)
-            print(f"[SWAP] {ingestion_table} → {snake_name}", file=sys.stderr)
+            print(f"[SWAP] {ingestion_table} → {name}", file=sys.stderr)
             for v in seen_versions:
-                _upsert_version(conn, snake_name, v)
-                print(f"[VERSION] {snake_name} = {v}", file=sys.stderr)
+                _upsert_version(conn, name, v)
+                print(f"[VERSION] {name} = {v}", file=sys.stderr)
         else:
             print(f"[SKIP] {name}: no regions loaded successfully", file=sys.stderr)
     finally:
         conn.close()
 
-    return snake_name, regions_loaded
+    return name, regions_loaded
 
 
 def load_pricing_data(name_filter: str | None = None, force: bool = False) -> dict:
