@@ -4,28 +4,6 @@ Crawls the [AWS Pricing API](https://pricing.us-east-1.amazonaws.com) to discove
 
 Exposed as a FastAPI HTTP service, with a CLI available for local use.
 
-## Quick start
-
-```mermaid
-flowchart TD
-    A([Start]) --> B["Copy & fill .env\ncp .env.example .env"]
-    B --> C["Start the stack\ndocker compose up --build -d"]
-    C --> D["DB migrations run automatically on startup"]
-    D --> E{"How do you want\nto load data?"}
-
-    E -->|API| F["POST /pricing/load\noptional: {\"name\": \"comprehend\"}"]
-    E -->|CLI| G["python fetch_pricing_index.py --load\n--name comprehend  # single service"]
-
-    F --> H["Data loaded into PostgreSQL\ningestion → swap → version recorded"]
-    G --> H
-
-    H --> I["GET /versions\ncheck what's loaded"]
-    I --> J([Done])
-
-    style A fill:#2d6a4f,color:#fff
-    style J fill:#2d6a4f,color:#fff
-```
-
 ## Setup
 
 ### Docker (recommended)
@@ -92,6 +70,26 @@ All vars are read from `.env` (or the shell environment). Copy `.env.example` to
 | `GET` | `/pricing/urls` | List all discovered pricing URLs; generates any missing schema files |
 | `POST` | `/pricing/load` | Load pricing data into PostgreSQL (blocks until complete) |
 | `GET` | `/versions` | List all loaded service versions |
+
+**GET /pricing/urls**
+
+```mermaid
+flowchart LR
+    U1["Fetch AWS service index"] --> U2["Fetch region indexes per service"]
+    U2 --> U3["Generate missing schema files\n(schema/*.sql)"]
+    U3 --> U4["Return all pricing URLs"]
+```
+
+**POST /pricing/load**
+
+```mermaid
+flowchart LR
+    L1["Check versions table\n(skip already-loaded)"] --> L2["Union columns from all region CSVs"]
+    L2 --> L3["CREATE TABLE {service}_ingestion"]
+    L3 --> L4["COPY each region CSV → ingestion table"]
+    L4 --> L5["Swap ingestion → production table"]
+    L5 --> L6["Upsert version record"]
+```
 
 `POST /pricing/load` accepts an optional JSON body to target a single service:
 
