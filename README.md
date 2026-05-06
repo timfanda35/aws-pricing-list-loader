@@ -4,6 +4,28 @@ Crawls the [AWS Pricing API](https://pricing.us-east-1.amazonaws.com) to discove
 
 Exposed as a FastAPI HTTP service, with a CLI available for local use.
 
+## Quick start
+
+```mermaid
+flowchart TD
+    A([Start]) --> B["Copy & fill .env\ncp .env.example .env"]
+    B --> C["Start the stack\ndocker compose up --build -d"]
+    C --> D["DB migrations run automatically on startup"]
+    D --> E{"How do you want\nto load data?"}
+
+    E -->|API| F["POST /pricing/load\noptional: {\"name\": \"comprehend\"}"]
+    E -->|CLI| G["python fetch_pricing_index.py --load\n--name comprehend  # single service"]
+
+    F --> H["Data loaded into PostgreSQL\ningestion → swap → version recorded"]
+    G --> H
+
+    H --> I["GET /versions\ncheck what's loaded"]
+    I --> J([Done])
+
+    style A fill:#2d6a4f,color:#fff
+    style J fill:#2d6a4f,color:#fff
+```
+
 ## Setup
 
 ### Docker (recommended)
@@ -110,10 +132,12 @@ Already-loaded versions are skipped automatically (tracked in `aws_pricing_list_
 
 For each service with new data:
 
-1. Generates a `CREATE TABLE` schema from the CSV header row and executes it directly to the DB.
+1. Fetches column headers from all region CSVs concurrently and unions them into a single column list, then generates and executes a `CREATE TABLE` DDL directly to the DB. This ensures columns present in only some regions are included.
 2. Streams each region's CSV, strips the first 6 lines (metadata + header), and bulk-loads the data via `COPY … FROM STDIN`.
 3. Atomically swaps the ingestion table into production: renames the existing `{service}` table to `drop_{service}`, renames `{service}_ingestion` to `{service}`, then drops `drop_{service}`.
 4. Records the loaded version in `aws_pricing_list_versions` so subsequent runs skip it.
+
+Table names use the original AWS service name (e.g. `AmazonEC2`, `AWSDatabaseSavingsPlans`), not snake_case.
 
 ## Schema files
 
