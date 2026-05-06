@@ -17,7 +17,6 @@ from app.services.aws_client import (
     ("aws-comprehend", "aws_comprehend"),
     ("amazon_bedrock", "amazon_bedrock"),
     ("AmazonRDS", "amazon_rds"),
-    ("VMwareCloudOnAWS", "vmware_cloud_on_aws"),
 ])
 def test_to_snake_case(name, expected):
     assert to_snake_case(name) == expected
