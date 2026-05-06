@@ -63,6 +63,30 @@ def _create_ingestion_table(conn, ingestion_table: str, columns: list[str], vers
     return ordered_columns
 
 
+def _fetch_all_columns(rows: list[dict]) -> tuple[list[str], dict[str, list[str]]]:
+    per_url: dict[str, list[str]] = {}
+
+    def fetch(csv_url: str) -> tuple[str, list[str]]:
+        return csv_url, get_csv_column_names(f"{BASE_URL}{csv_url}")
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(fetch, row["csv_url"]): row["csv_url"] for row in rows}
+        for future in as_completed(futures):
+            csv_url, cols = future.result()
+            per_url[csv_url] = cols
+
+    base = per_url.get(rows[0]["csv_url"], [])
+    seen = set(base)
+    extras: list[str] = []
+    for row in rows[1:]:
+        for col in per_url.get(row["csv_url"], []):
+            if col not in seen:
+                seen.add(col)
+                extras.append(col)
+
+    return base + extras, per_url
+
+
 def _download_csv_strip_header(csv_url: str, dest_path: str) -> int:
     row_count = 0
     with requests.get(f"{BASE_URL}{csv_url}", stream=True) as resp:

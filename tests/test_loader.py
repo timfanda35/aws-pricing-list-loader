@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
-from app.services.loader import load_pricing_data, _create_ingestion_table
+from app.services.loader import load_pricing_data, _create_ingestion_table, _fetch_all_columns
+from app.services.aws_client import BASE_URL
 
 
 class TestLoadPricingDataForce:
@@ -66,3 +67,67 @@ class TestCreateIngestionTable:
         with patch("app.services.loader.build_schema_sql", return_value="CREATE TABLE t;"):
             result = _create_ingestion_table(conn, "t_ingestion", ["rate_code", "sku"], "20260101")
         assert result == ["sku", "rate_code"]
+
+
+class TestFetchAllColumns:
+    def test_calls_get_csv_column_names_for_each_row(self):
+        rows = [
+            {"csv_url": "/url/a.csv", "name": "svc"},
+            {"csv_url": "/url/b.csv", "name": "svc"},
+        ]
+        cols_map = {
+            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
+            f"{BASE_URL}/url/b.csv": ["rate_code", "region_code"],
+        }
+        with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]) as mock_get:
+            _fetch_all_columns(rows)
+        assert mock_get.call_count == 2
+
+    def test_returns_union_of_all_columns(self):
+        rows = [
+            {"csv_url": "/url/a.csv", "name": "svc"},
+            {"csv_url": "/url/b.csv", "name": "svc"},
+        ]
+        cols_map = {
+            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
+            f"{BASE_URL}/url/b.csv": ["rate_code", "region_code"],
+        }
+        with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
+            unioned, _ = _fetch_all_columns(rows)
+        assert set(unioned) == {"rate_code", "sku", "region_code"}
+
+    def test_first_url_columns_come_first_in_union(self):
+        rows = [
+            {"csv_url": "/url/a.csv", "name": "svc"},
+            {"csv_url": "/url/b.csv", "name": "svc"},
+        ]
+        cols_map = {
+            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
+            f"{BASE_URL}/url/b.csv": ["rate_code", "extra_col"],
+        }
+        with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
+            unioned, _ = _fetch_all_columns(rows)
+        assert unioned[0] == "rate_code"
+        assert unioned[1] == "sku"
+        assert unioned[2] == "extra_col"
+
+    def test_returns_per_url_column_map(self):
+        rows = [
+            {"csv_url": "/url/a.csv", "name": "svc"},
+            {"csv_url": "/url/b.csv", "name": "svc"},
+        ]
+        cols_map = {
+            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
+            f"{BASE_URL}/url/b.csv": ["rate_code", "region_code"],
+        }
+        with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
+            _, per_url = _fetch_all_columns(rows)
+        assert per_url["/url/a.csv"] == ["rate_code", "sku"]
+        assert per_url["/url/b.csv"] == ["rate_code", "region_code"]
+
+    def test_single_url_returns_its_columns_unchanged(self):
+        rows = [{"csv_url": "/url/a.csv", "name": "svc"}]
+        with patch("app.services.loader.get_csv_column_names", return_value=["rate_code", "sku"]):
+            unioned, per_url = _fetch_all_columns(rows)
+        assert unioned == ["rate_code", "sku"]
+        assert per_url == {"/url/a.csv": ["rate_code", "sku"]}
