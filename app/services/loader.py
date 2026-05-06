@@ -44,8 +44,7 @@ def get_all_versions() -> list[dict]:
         conn.close()
 
 
-def _create_ingestion_table(conn, ingestion_table: str, csv_url: str, version: str) -> list[str]:
-    columns = get_csv_column_names(f"{BASE_URL}{csv_url}")
+def _create_ingestion_table(conn, ingestion_table: str, columns: list[str], version: str) -> list[str]:
     ddl = build_schema_sql(ingestion_table, columns, version)
     with conn.cursor() as cur:
         cur.execute(f'DROP TABLE IF EXISTS "{ingestion_table}" CASCADE')
