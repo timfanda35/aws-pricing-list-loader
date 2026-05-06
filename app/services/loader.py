@@ -12,13 +12,19 @@ from app.services.aws_client import BASE_URL, get_all_pricing_urls
 from app.services.schema_builder import build_schema_sql, get_csv_column_names
 
 
-def load_known_versions() -> frozenset[tuple[str, str]]:
+def load_known_versions(name: str | None = None) -> frozenset[tuple[str, str]]:
     try:
         conn = get_db_conn()
         try:
             with conn:
                 with conn.cursor() as cur:
-                    cur.execute("SELECT name, version FROM aws_pricing_list_versions")
+                    if name is not None:
+                        cur.execute(
+                            "SELECT name, version FROM aws_pricing_list_versions WHERE name = %s",
+                            (name,),
+                        )
+                    else:
+                        cur.execute("SELECT name, version FROM aws_pricing_list_versions")
                     return frozenset(cur.fetchall())
         finally:
             conn.close()
@@ -154,7 +160,7 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
 
 def load_pricing_data(name_filter: str | None = None, force: bool = False) -> dict:
     start = time.time()
-    known_versions = None if force else load_known_versions()
+    known_versions = None if force else load_known_versions(name_filter)
     all_rows = get_all_pricing_urls(known_versions)
 
     groups: dict[str, list[dict]] = defaultdict(list)
