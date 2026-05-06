@@ -1,10 +1,10 @@
+import sys
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.services.aws_client import BASE_URL, get_all_pricing_urls
 from app.services.loader import load_known_versions, load_pricing_data
 from app.services.schema_builder import generate_missing_schemas
-
 
 class PricingUrl(BaseModel):
     type: str
@@ -48,6 +48,9 @@ def list_pricing_urls():
 @router.post("/load", response_model=LoadResult)
 def trigger_load(body: LoadRequest | None = None):
     name_filter = body.name if body else None
+
+    print(f"[INFO] Load service name: {name_filter}", file=sys.stderr)
+
     force = bool(body and body.force)
     result = load_pricing_data(name_filter=name_filter, force=force)
     return LoadResult(**result)
