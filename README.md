@@ -86,7 +86,7 @@ flowchart LR
 flowchart LR
     L1["Check versions table\n(skip already-loaded)"] --> L2["Union columns from all region CSVs"]
     L2 --> L3["CREATE TABLE {service}_ingestion"]
-    L3 --> L4["COPY each region CSV → ingestion table"]
+    L3 --> L4["COPY each region CSV → staging table\n→ INSERT ON CONFLICT DO NOTHING → ingestion table"]
     L4 --> L5["Swap ingestion → production table"]
     L5 --> L6["Upsert version record"]
 ```
@@ -131,7 +131,7 @@ Already-loaded versions are skipped automatically (tracked in `aws_pricing_list_
 For each service with new data:
 
 1. Fetches column headers from all region CSVs concurrently and unions them into a single column list, then generates and executes a `CREATE TABLE` DDL directly to the DB. This ensures columns present in only some regions are included.
-2. Streams each region's CSV, strips the first 6 lines (metadata + header), and bulk-loads the data via `COPY … FROM STDIN`.
+2. Streams each region's CSV, strips the first 6 lines (metadata + header), and bulk-loads the data via `COPY … FROM STDIN` into a temporary `UNLOGGED` staging table (no PK constraint). Rows are then merged into the ingestion table with `INSERT … ON CONFLICT (rate_code) DO NOTHING`, so global items that appear identically in multiple region CSVs are silently deduplicated.
 3. Atomically swaps the ingestion table into production: renames the existing `{service}` table to `drop_{service}`, renames `{service}_ingestion` to `{service}`, then drops `drop_{service}`.
 4. Records the loaded version in `aws_pricing_list_versions` so subsequent runs skip it.
 
