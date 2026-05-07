@@ -12,7 +12,6 @@ SCHEMA_DIR = Path(__file__).parent.parent.parent / "schema"
 
 _COLUMN_TYPE_MAPPINGS = {
     'effective_date': 'DATE',
-    'lease_contract_length': 'INTEGER',
     'discounted_rate': 'DECIMAL(20,10)',
     'price_per_unit': 'DECIMAL(20,10)',
 }

@@ -22,9 +22,6 @@ class TestColumnDefinition:
     def test_effective_date_is_date(self):
         assert _column_definition("effective_date") == '    "effective_date" DATE'
 
-    def test_lease_contract_length_is_integer(self):
-        assert _column_definition("lease_contract_length") == '    "lease_contract_length" INTEGER'
-
     def test_discounted_rate_is_decimal(self):
         assert _column_definition("discounted_rate") == '    "discounted_rate" DECIMAL(20,10)'
 

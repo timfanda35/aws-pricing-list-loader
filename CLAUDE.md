@@ -87,7 +87,7 @@ migrations/              # Versioned SQL migration files, applied in filename or
 
 1. **Version check** — Loads `(name, version)` pairs from `aws_pricing_list_versions` (filtered by name when a name filter is active); skips any region whose version is already recorded.
 2. **Create ingestion table** — For each service with new data, fetches column headers from all region CSVs concurrently (`_fetch_all_columns`) and unions them into a single column list, then generates DDL via `build_schema_sql()` and executes it directly to the DB (`DROP … CASCADE` then `CREATE TABLE` + `CREATE INDEX`). No schema file is read or written.
-3. **Download & load** — Streams each region CSV, skips the first 6 lines (5 metadata + 1 header), writes data rows to a temp file, then `COPY … FROM STDIN` into the ingestion table. Temp file is deleted immediately after.
+3. **Download & load** — Streams each region CSV, skips the first 6 lines (5 metadata + 1 header), writes data rows to a temp file, then `COPY … FROM STDIN` into a temporary `UNLOGGED` staging table (no PK constraint), followed by `INSERT … ON CONFLICT (rate_code) DO NOTHING` into the ingestion table. This handles global items (e.g. `Global-Penetration-Testing`) that appear identically in multiple region CSVs. Temp file and staging table are deleted immediately after.
 4. **Table swap** — After all regions for a service are loaded: renames the existing production table to `drop_{name}`, renames `{name}_ingestion` to `{name}`, then drops `drop_{name}`. First-run safe (`ALTER TABLE IF EXISTS`).
 5. **Version record** — Upserts the loaded `(name, version)` into `aws_pricing_list_versions`.
 

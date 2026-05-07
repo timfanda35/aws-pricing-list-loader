@@ -107,11 +107,28 @@ def _download_csv_strip_header(csv_url: str, dest_path: str) -> int:
 
 
 def _copy_csv_to_table(conn, ingestion_table: str, columns: list[str], csv_path: str) -> None:
+    staging_table = f"{ingestion_table}_staging"
     col_list = ", ".join(f'"{c}"' for c in columns)
-    sql = f'COPY "{ingestion_table}" ({col_list}) FROM STDIN WITH (FORMAT CSV, QUOTE \'"\');'
+
+    with conn.cursor() as cur:
+        cur.execute(f'DROP TABLE IF EXISTS "{staging_table}"')
+        cur.execute(
+            f'CREATE UNLOGGED TABLE "{staging_table}" '
+            f'(LIKE "{ingestion_table}" INCLUDING DEFAULTS EXCLUDING CONSTRAINTS)'
+        )
+
+    copy_sql = f'COPY "{staging_table}" ({col_list}) FROM STDIN WITH (FORMAT CSV, QUOTE \'"\');'
     with open(csv_path, "rb") as f:
         with conn.cursor() as cur:
-            cur.copy_expert(sql, f)
+            cur.copy_expert(copy_sql, f)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            f'INSERT INTO "{ingestion_table}" ({col_list}) '
+            f'SELECT {col_list} FROM "{staging_table}" '
+            f'ON CONFLICT (rate_code) DO NOTHING'
+        )
+        cur.execute(f'DROP TABLE IF EXISTS "{staging_table}"')
     conn.commit()
 
 

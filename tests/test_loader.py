@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 import os
 
-from app.services.loader import load_pricing_data, _create_ingestion_table, _fetch_all_columns, _process_pricing_group
+from app.services.loader import load_pricing_data, _create_ingestion_table, _fetch_all_columns, _process_pricing_group, _copy_csv_to_table
 from app.services.aws_client import BASE_URL
 
 
@@ -243,3 +243,61 @@ class TestProcessPricingGroupColumnUnion:
             _process_pricing_group(rows)
 
         assert copy_cols_used == [unioned]
+
+
+class TestCopyCsvToTable:
+    def _make_conn(self):
+        mock_cur = MagicMock()
+        mock_cur.__enter__ = MagicMock(return_value=mock_cur)
+        mock_cur.__exit__ = MagicMock(return_value=False)
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value = mock_cur
+        return mock_conn, mock_cur
+
+    def test_copies_via_staging_table(self, tmp_path):
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_bytes(b'"rate1","sku1"\n')
+
+        conn, cur = self._make_conn()
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+
+        execute_calls = [str(c.args[0]) for c in cur.execute.call_args_list]
+        assert any('DROP TABLE IF EXISTS "svc_ingestion_staging"' in s for s in execute_calls)
+        assert any('CREATE UNLOGGED TABLE "svc_ingestion_staging"' in s for s in execute_calls)
+        assert any('ON CONFLICT (rate_code) DO NOTHING' in s for s in execute_calls)
+        assert any('DROP TABLE IF EXISTS "svc_ingestion_staging"' in execute_calls[-1] for _ in [1])
+
+    def test_copy_targets_staging_not_ingestion(self, tmp_path):
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_bytes(b'"rate1","sku1"\n')
+
+        conn, cur = self._make_conn()
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+
+        copy_expert_calls = [str(c.args[0]) for c in cur.copy_expert.call_args_list]
+        assert len(copy_expert_calls) == 1
+        assert '"svc_ingestion_staging"' in copy_expert_calls[0]
+        assert '"svc_ingestion"' not in copy_expert_calls[0]
+
+    def test_insert_uses_on_conflict_do_nothing(self, tmp_path):
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_bytes(b'"rate1","sku1"\n')
+
+        conn, cur = self._make_conn()
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+
+        insert_calls = [str(c.args[0]) for c in cur.execute.call_args_list
+                        if 'INSERT INTO' in str(c.args[0])]
+        assert len(insert_calls) == 1
+        assert '"svc_ingestion"' in insert_calls[0]
+        assert 'FROM "svc_ingestion_staging"' in insert_calls[0]
+        assert 'ON CONFLICT (rate_code) DO NOTHING' in insert_calls[0]
+
+    def test_commits_after_insert(self, tmp_path):
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_bytes(b'"rate1","sku1"\n')
+
+        conn, cur = self._make_conn()
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+
+        conn.commit.assert_called_once()
