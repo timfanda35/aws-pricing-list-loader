@@ -70,6 +70,11 @@ class TestCreateIngestionTable:
         assert result == ["sku", "rate_code"]
 
 
+def _cols(cols, mm=None):
+    """Helper: simulate get_csv_column_names return value."""
+    return cols, mm or {}
+
+
 class TestFetchAllColumns:
     def test_calls_get_csv_column_names_for_each_row(self):
         rows = [
@@ -77,26 +82,28 @@ class TestFetchAllColumns:
             {"csv_url": "/url/b.csv", "name": "svc"},
         ]
         cols_map = {
-            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
-            f"{BASE_URL}/url/b.csv": ["rate_code", "region_code"],
+            f"{BASE_URL}/url/a.csv": _cols(["rate_code", "sku"]),
+            f"{BASE_URL}/url/b.csv": _cols(["rate_code", "region_code"]),
         }
         with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]) as mock_get:
             _fetch_all_columns(rows)
         mock_get.assert_any_call(f"{BASE_URL}/url/a.csv")
         mock_get.assert_any_call(f"{BASE_URL}/url/b.csv")
 
-    def test_returns_union_of_all_columns(self):
+    def test_returns_union_of_all_staging_columns(self):
         rows = [
             {"csv_url": "/url/a.csv", "name": "svc"},
             {"csv_url": "/url/b.csv", "name": "svc"},
         ]
         cols_map = {
-            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
-            f"{BASE_URL}/url/b.csv": ["rate_code", "region_code"],
+            f"{BASE_URL}/url/a.csv": _cols(["rate_code", "sku"]),
+            f"{BASE_URL}/url/b.csv": _cols(["rate_code", "region_code"]),
         }
         with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
-            unioned, _ = _fetch_all_columns(rows)
-        assert set(unioned) == {"rate_code", "sku", "region_code"}
+            staging, ingestion, merge_map, _ = _fetch_all_columns(rows)
+        assert set(staging) == {"rate_code", "sku", "region_code"}
+        assert set(ingestion) == {"rate_code", "sku", "region_code"}
+        assert merge_map == {}
 
     def test_first_url_columns_come_first_in_union(self):
         rows = [
@@ -104,40 +111,71 @@ class TestFetchAllColumns:
             {"csv_url": "/url/b.csv", "name": "svc"},
         ]
         cols_map = {
-            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
-            f"{BASE_URL}/url/b.csv": ["rate_code", "extra_col"],
+            f"{BASE_URL}/url/a.csv": _cols(["rate_code", "sku"]),
+            f"{BASE_URL}/url/b.csv": _cols(["rate_code", "extra_col"]),
         }
         with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
-            unioned, _ = _fetch_all_columns(rows)
-        assert unioned[0] == "rate_code"
-        assert unioned[1] == "sku"
-        assert unioned[2] == "extra_col"
+            staging, _, _, _ = _fetch_all_columns(rows)
+        assert staging[0] == "rate_code"
+        assert staging[1] == "sku"
+        assert staging[2] == "extra_col"
 
-    def test_returns_per_url_column_map(self):
+    def test_returns_per_url_staging_column_map(self):
         rows = [
             {"csv_url": "/url/a.csv", "name": "svc"},
             {"csv_url": "/url/b.csv", "name": "svc"},
         ]
         cols_map = {
-            f"{BASE_URL}/url/a.csv": ["rate_code", "sku"],
-            f"{BASE_URL}/url/b.csv": ["rate_code", "region_code"],
+            f"{BASE_URL}/url/a.csv": _cols(["rate_code", "sku"]),
+            f"{BASE_URL}/url/b.csv": _cols(["rate_code", "region_code"]),
         }
         with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
-            _, per_url = _fetch_all_columns(rows)
+            _, _, _, per_url = _fetch_all_columns(rows)
         assert per_url["/url/a.csv"] == ["rate_code", "sku"]
         assert per_url["/url/b.csv"] == ["rate_code", "region_code"]
 
     def test_single_url_returns_its_columns_unchanged(self):
         rows = [{"csv_url": "/url/a.csv", "name": "svc"}]
-        with patch("app.services.loader.get_csv_column_names", return_value=["rate_code", "sku"]):
-            unioned, per_url = _fetch_all_columns(rows)
-        assert unioned == ["rate_code", "sku"]
+        with patch("app.services.loader.get_csv_column_names", return_value=_cols(["rate_code", "sku"])):
+            staging, ingestion, merge_map, per_url = _fetch_all_columns(rows)
+        assert staging == ["rate_code", "sku"]
+        assert ingestion == ["rate_code", "sku"]
+        assert merge_map == {}
         assert per_url == {"/url/a.csv": ["rate_code", "sku"]}
 
     def test_empty_rows_returns_empty(self):
-        unioned, per_url = _fetch_all_columns([])
-        assert unioned == []
+        staging, ingestion, merge_map, per_url = _fetch_all_columns([])
+        assert staging == []
+        assert ingestion == []
+        assert merge_map == {}
         assert per_url == {}
+
+    def test_duplicate_columns_excluded_from_ingestion_cols(self):
+        rows = [{"csv_url": "/url/a.csv", "name": "svc"}]
+        mm = {"storage_type": ["storage_type", "storage_type_2"]}
+        with patch("app.services.loader.get_csv_column_names",
+                   return_value=(["rate_code", "storage_type", "storage_type_2"], mm)):
+            staging, ingestion, merge_map, _ = _fetch_all_columns(rows)
+        assert staging == ["rate_code", "storage_type", "storage_type_2"]
+        assert ingestion == ["rate_code", "storage_type"]
+        assert merge_map == mm
+
+    def test_merge_maps_aggregated_across_regions(self):
+        rows = [
+            {"csv_url": "/url/a.csv", "name": "svc"},
+            {"csv_url": "/url/b.csv", "name": "svc"},
+        ]
+        mm_a = {"storage_type": ["storage_type", "storage_type_2"]}
+        mm_b = {}
+        cols_map = {
+            f"{BASE_URL}/url/a.csv": (["rate_code", "storage_type", "storage_type_2"], mm_a),
+            f"{BASE_URL}/url/b.csv": (["rate_code", "storage_type"], mm_b),
+        }
+        with patch("app.services.loader.get_csv_column_names", side_effect=lambda u: cols_map[u]):
+            _, ingestion, merge_map, _ = _fetch_all_columns(rows)
+        assert "storage_type_2" not in ingestion
+        assert "storage_type" in ingestion
+        assert merge_map == {"storage_type": ["storage_type", "storage_type_2"]}
 
 
 class TestProcessPricingGroupColumnUnion:
@@ -148,9 +186,12 @@ class TestProcessPricingGroupColumnUnion:
         mock_tmp.name = name
         return mock_tmp
 
-    # Realistic AWS CSV URL pattern: /offers/v1.0/aws/{service}/{version}/...
     _URL_A = "/offers/v1.0/aws/svc/20260101/us-east-1/index.csv"
     _URL_B = "/offers/v1.0/aws/svc/20260101/us-west-2/index.csv"
+    _EMPTY_FETCH = ([], [], {}, {})
+
+    def _fetch_return(self, staging, ingestion=None, merge_map=None, per_url=None):
+        return (staging, ingestion or staging, merge_map or {}, per_url or {self._URL_A: staging})
 
     def test_fetch_all_columns_called_before_create_ingestion_table(self):
         rows = [
@@ -161,7 +202,7 @@ class TestProcessPricingGroupColumnUnion:
 
         def mock_fetch(rows):
             call_order.append("fetch")
-            return ["rate_code", "sku"], {self._URL_A: ["rate_code", "sku"], self._URL_B: ["rate_code", "sku"]}
+            return self._fetch_return(["rate_code", "sku"])
 
         def mock_create(conn, table, cols, version):
             call_order.append("create")
@@ -180,13 +221,16 @@ class TestProcessPricingGroupColumnUnion:
 
         assert call_order.index("fetch") < call_order.index("create")
 
-    def test_create_ingestion_table_called_with_unioned_columns(self):
+    def test_create_ingestion_table_called_with_ingestion_cols(self):
         rows = [{"csv_url": self._URL_A, "name": "svc", "region": "us-east-1"}]
-        unioned = ["rate_code", "sku", "extra"]
+        ingestion = ["rate_code", "sku"]
+        staging = ["rate_code", "sku", "sku_2"]
+        mm = {"sku": ["sku", "sku_2"]}
 
         with patch("app.services.loader.get_db_conn"), \
-             patch("app.services.loader._fetch_all_columns", return_value=(unioned, {self._URL_A: ["rate_code", "sku"]})), \
-             patch("app.services.loader._create_ingestion_table", return_value=unioned) as mock_create, \
+             patch("app.services.loader._fetch_all_columns",
+                   return_value=(staging, ingestion, mm, {self._URL_A: staging})), \
+             patch("app.services.loader._create_ingestion_table", return_value=ingestion) as mock_create, \
              patch("app.services.loader._download_csv_strip_header", return_value=1), \
              patch("app.services.loader._copy_csv_to_table"), \
              patch("app.services.loader._swap_tables"), \
@@ -195,22 +239,24 @@ class TestProcessPricingGroupColumnUnion:
              patch("app.services.loader.os.path.exists", return_value=False):
             _process_pricing_group(rows)
 
-        # positional: conn, table, columns, version
-        assert mock_create.call_args[0][2] == unioned
+        assert mock_create.call_args[0][2] == ingestion
 
-    def test_copy_uses_per_url_columns_not_unioned(self):
+    def test_copy_uses_per_url_staging_cols(self):
         rows = [{"csv_url": self._URL_A, "name": "svc", "region": "us-east-1"}]
-        unioned = ["rate_code", "sku", "extra"]
-        per_url = {self._URL_A: ["rate_code", "sku"]}
+        staging = ["rate_code", "sku", "storage_type", "storage_type_2"]
+        ingestion = ["rate_code", "sku", "storage_type"]
+        mm = {"storage_type": ["storage_type", "storage_type_2"]}
+        per_url = {self._URL_A: staging}
 
-        copy_cols_used = []
+        copy_args_used = []
 
-        def mock_copy(conn, table, cols, path):
-            copy_cols_used.append(cols)
+        def mock_copy(conn, table, staging_cols, merge_map, path):
+            copy_args_used.append((staging_cols, merge_map))
 
         with patch("app.services.loader.get_db_conn"), \
-             patch("app.services.loader._fetch_all_columns", return_value=(unioned, per_url)), \
-             patch("app.services.loader._create_ingestion_table", return_value=unioned), \
+             patch("app.services.loader._fetch_all_columns",
+                   return_value=(staging, ingestion, mm, per_url)), \
+             patch("app.services.loader._create_ingestion_table", return_value=ingestion), \
              patch("app.services.loader._download_csv_strip_header", return_value=1), \
              patch("app.services.loader._copy_csv_to_table", side_effect=mock_copy), \
              patch("app.services.loader._swap_tables"), \
@@ -219,21 +265,23 @@ class TestProcessPricingGroupColumnUnion:
              patch("app.services.loader.os.path.exists", return_value=False):
             _process_pricing_group(rows)
 
-        assert copy_cols_used == [["rate_code", "sku"]]
+        assert copy_args_used == [(staging, mm)]
 
-    def test_copy_falls_back_to_full_columns_when_url_missing_from_per_url(self):
-        rows = [{"csv_url": "/offers/v1.0/aws/svc/20260101/us-east-1/index.csv", "name": "svc", "region": "us-east-1"}]
-        unioned = ["rate_code", "sku", "extra"]
-        per_url = {}  # URL absent from per_url (simulates failed header fetch for this URL)
+    def test_copy_falls_back_to_full_staging_when_url_missing_from_per_url(self):
+        rows = [{"csv_url": self._URL_A, "name": "svc", "region": "us-east-1"}]
+        staging = ["rate_code", "sku"]
+        ingestion = ["rate_code", "sku"]
+        mm = {}
 
-        copy_cols_used = []
+        copy_args_used = []
 
-        def mock_copy(conn, table, cols, path):
-            copy_cols_used.append(cols)
+        def mock_copy(conn, table, staging_cols, merge_map, path):
+            copy_args_used.append(staging_cols)
 
         with patch("app.services.loader.get_db_conn"), \
-             patch("app.services.loader._fetch_all_columns", return_value=(unioned, per_url)), \
-             patch("app.services.loader._create_ingestion_table", return_value=unioned), \
+             patch("app.services.loader._fetch_all_columns",
+                   return_value=(staging, ingestion, mm, {})), \
+             patch("app.services.loader._create_ingestion_table", return_value=ingestion), \
              patch("app.services.loader._download_csv_strip_header", return_value=1), \
              patch("app.services.loader._copy_csv_to_table", side_effect=mock_copy), \
              patch("app.services.loader._swap_tables"), \
@@ -242,7 +290,7 @@ class TestProcessPricingGroupColumnUnion:
              patch("app.services.loader.os.path.exists", return_value=False):
             _process_pricing_group(rows)
 
-        assert copy_cols_used == [unioned]
+        assert copy_args_used == [staging]
 
 
 class TestCopyCsvToTable:
@@ -259,20 +307,20 @@ class TestCopyCsvToTable:
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
 
         execute_calls = [str(c.args[0]) for c in cur.execute.call_args_list]
         assert any('DROP TABLE IF EXISTS "svc_ingestion_staging"' in s for s in execute_calls)
         assert any('CREATE UNLOGGED TABLE "svc_ingestion_staging"' in s for s in execute_calls)
         assert any('ON CONFLICT (rate_code) DO NOTHING' in s for s in execute_calls)
-        assert any('DROP TABLE IF EXISTS "svc_ingestion_staging"' in execute_calls[-1] for _ in [1])
+        assert 'DROP TABLE IF EXISTS "svc_ingestion_staging"' in execute_calls[-1]
 
     def test_copy_targets_staging_not_ingestion(self, tmp_path):
         csv_file = tmp_path / "test.csv"
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
 
         copy_expert_calls = [str(c.args[0]) for c in cur.copy_expert.call_args_list]
         assert len(copy_expert_calls) == 1
@@ -284,7 +332,7 @@ class TestCopyCsvToTable:
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
 
         insert_calls = [str(c.args[0]) for c in cur.execute.call_args_list
                         if 'INSERT INTO' in str(c.args[0])]
@@ -298,6 +346,43 @@ class TestCopyCsvToTable:
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
 
         conn.commit.assert_called_once()
+
+    def test_coalesce_generated_for_duplicate_columns(self, tmp_path):
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_bytes(b'"rate1","val",""\n')
+
+        conn, cur = self._make_conn()
+        mm = {"storage_type": ["storage_type", "storage_type_2"]}
+        _copy_csv_to_table(
+            conn, "svc_ingestion",
+            ["rate_code", "storage_type", "storage_type_2"],
+            mm, str(csv_file),
+        )
+
+        insert_calls = [str(c.args[0]) for c in cur.execute.call_args_list
+                        if 'INSERT INTO' in str(c.args[0])]
+        assert len(insert_calls) == 1
+        assert 'COALESCE("storage_type", "storage_type_2")' in insert_calls[0]
+        # storage_type_2 must not appear in the INSERT target column list
+        insert_col_list = insert_calls[0].split('SELECT')[0]
+        assert '"storage_type_2"' not in insert_col_list
+
+    def test_staging_table_has_all_staging_cols_including_duplicates(self, tmp_path):
+        csv_file = tmp_path / "test.csv"
+        csv_file.write_bytes(b'"rate1","val",""\n')
+
+        conn, cur = self._make_conn()
+        mm = {"storage_type": ["storage_type", "storage_type_2"]}
+        _copy_csv_to_table(
+            conn, "svc_ingestion",
+            ["rate_code", "storage_type", "storage_type_2"],
+            mm, str(csv_file),
+        )
+
+        create_calls = [str(c.args[0]) for c in cur.execute.call_args_list
+                        if 'CREATE UNLOGGED' in str(c.args[0])]
+        assert len(create_calls) == 1
+        assert '"storage_type_2"' in create_calls[0]

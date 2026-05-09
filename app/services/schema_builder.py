@@ -18,14 +18,32 @@ _COLUMN_TYPE_MAPPINGS = {
 _INDEX_COLUMNS = {'sku', 'region_code', 'discounted_region_code'}
 
 
-def get_csv_column_names(csv_url: str) -> list[str]:
+def get_csv_column_names(csv_url: str) -> tuple[list[str], dict[str, list[str]]]:
+    """Return (staging_cols, merge_map).
+
+    staging_cols: normalized column names with _2/_3 suffixes for collisions.
+    merge_map: {base: [base, dup, ...]} only for colliding columns.
+    """
     with requests.get(csv_url, stream=True) as resp:
         resp.raise_for_status()
         for i, line in enumerate(resp.iter_lines()):
             if i == 5:
                 raw = line.decode('utf-8')
-                return [to_snake_case(col.strip('"')) for col in raw.split(',')]
-    return []
+                seen: dict[str, int] = {}
+                staging_cols: list[str] = []
+                merge_map: dict[str, list[str]] = {}
+                for col in raw.split(','):
+                    name = to_snake_case(col.strip('"'))
+                    if name in seen:
+                        seen[name] += 1
+                        suffixed = f"{name}_{seen[name]}"
+                        staging_cols.append(suffixed)
+                        merge_map.setdefault(name, [name]).append(suffixed)
+                    else:
+                        seen[name] = 1
+                        staging_cols.append(name)
+                return staging_cols, merge_map
+    return [], {}
 
 
 def _column_definition(col: str) -> str:
@@ -70,8 +88,10 @@ def generate_missing_schemas(all_urls: list[dict], schema_dir: Path = SCHEMA_DIR
     def _generate(name: str, csv_url: str) -> tuple[str, str, str, str]:
         table = f"{name}_ingestion"
         version = csv_url[len(BASE_URL):].split("/")[5]
-        columns = get_csv_column_names(csv_url)
-        return table, build_schema_sql(table, columns, version), name, version
+        staging_cols, merge_map = get_csv_column_names(csv_url)
+        suffix_set = {c for variants in merge_map.values() for c in variants[1:]}
+        ingestion_cols = [c for c in staging_cols if c not in suffix_set]
+        return table, build_schema_sql(table, ingestion_cols, version), name, version
 
     def _upsert(cur, name: str, version: str) -> None:
         cur.execute(

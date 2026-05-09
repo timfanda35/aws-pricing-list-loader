@@ -1,4 +1,5 @@
 import hashlib
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -6,7 +7,58 @@ from app.services.schema_builder import (
     _column_definition,
     _index_name,
     build_schema_sql,
+    get_csv_column_names,
 )
+
+
+def _mock_csv_response(header_columns: list[str]):
+    raw_line = ",".join(f'"{c}"' for c in header_columns).encode("utf-8")
+    lines = [b"meta"] * 5 + [raw_line]
+    mock_resp = MagicMock()
+    mock_resp.iter_lines.return_value = iter(lines)
+    mock_resp.__enter__ = lambda s: s
+    mock_resp.__exit__ = MagicMock(return_value=False)
+    return mock_resp
+
+
+class TestGetCsvColumnNames:
+    def test_no_duplicates_unchanged(self):
+        with patch("app.services.schema_builder.requests.get") as mock_get:
+            mock_get.return_value = _mock_csv_response(["SKU", "RateCode", "PricePerUnit"])
+            staging_cols, merge_map = get_csv_column_names("http://example.com/test.csv")
+        assert staging_cols == ["sku", "rate_code", "price_per_unit"]
+        assert merge_map == {}
+
+    def test_duplicate_staging_cols_get_numeric_suffix(self):
+        with patch("app.services.schema_builder.requests.get") as mock_get:
+            mock_get.return_value = _mock_csv_response(["StorageType", "Storage Type"])
+            staging_cols, merge_map = get_csv_column_names("http://example.com/test.csv")
+        assert staging_cols == ["storage_type", "storage_type_2"]
+
+    def test_duplicate_produces_merge_map(self):
+        with patch("app.services.schema_builder.requests.get") as mock_get:
+            mock_get.return_value = _mock_csv_response(["StorageType", "Storage Type"])
+            staging_cols, merge_map = get_csv_column_names("http://example.com/test.csv")
+        assert merge_map == {"storage_type": ["storage_type", "storage_type_2"]}
+
+    def test_triple_collision(self):
+        with patch("app.services.schema_builder.requests.get") as mock_get:
+            mock_get.return_value = _mock_csv_response(["Col A", "Col-A", "ColA"])
+            staging_cols, merge_map = get_csv_column_names("http://example.com/test.csv")
+        assert staging_cols == ["col_a", "col_a_2", "col_a_3"]
+        assert merge_map == {"col_a": ["col_a", "col_a_2", "col_a_3"]}
+
+    def test_independent_collision_groups(self):
+        with patch("app.services.schema_builder.requests.get") as mock_get:
+            mock_get.return_value = _mock_csv_response(
+                ["SKU", "Storage Type", "StorageType", "RateCode", "Rate Code"]
+            )
+            staging_cols, merge_map = get_csv_column_names("http://example.com/test.csv")
+        assert staging_cols == ["sku", "storage_type", "storage_type_2", "rate_code", "rate_code_2"]
+        assert merge_map == {
+            "storage_type": ["storage_type", "storage_type_2"],
+            "rate_code": ["rate_code", "rate_code_2"],
+        }
 
 
 class TestColumnDefinition:
