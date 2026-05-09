@@ -80,14 +80,14 @@ migrations/              # Versioned SQL migration files, applied in filename or
 
 1. **Service index** — Fetches `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json` to get all AWS services and their region index URLs.
 2. **Region index per service** — Fetches each service's `region_index.json` to get per-region versioned CSV URLs. Savings Plans (3 hardcoded paths) follow a slightly different JSON structure (`regions[]` array vs object).
-3. **CSV schema generation** — For each service/savings-plan not yet in `schema/`, fetches line 6 of the CSV (streaming, no full download) to read column headers, converts them to snake_case, then writes a `CREATE TABLE` + `CREATE INDEX` DDL to `schema/{table}_ingestion.sql`.
+3. **CSV schema generation** — For each service/savings-plan not yet in `schema/`, fetches line 6 of the CSV (streaming, no full download) to read column headers, normalises them to snake_case, resolves any collisions (see Schema Generation Rules), then writes a `CREATE TABLE` + `CREATE INDEX` DDL to `schema/{table}_ingestion.sql`.
 4. **Output** — Returns/prints all discovered pricing URLs (type, name, region, csv_url, publication_date).
 
 ## Data Flow — load mode
 
 1. **Version check** — Loads `(name, version)` pairs from `aws_pricing_list_versions` (filtered by name when a name filter is active); skips any region whose version is already recorded.
-2. **Create ingestion table** — For each service with new data, fetches column headers from all region CSVs concurrently (`_fetch_all_columns`) and unions them into a single column list, then generates DDL via `build_schema_sql()` and executes it directly to the DB (`DROP … CASCADE` then `CREATE TABLE` + `CREATE INDEX`). No schema file is read or written.
-3. **Download & load** — Streams each region CSV, skips the first 6 lines (5 metadata + 1 header), writes data rows to a temp file, then `COPY … FROM STDIN` into a temporary `UNLOGGED` staging table (no PK constraint), followed by `INSERT … ON CONFLICT (rate_code) DO NOTHING` into the ingestion table. This handles global items (e.g. `Global-Penetration-Testing`) that appear identically in multiple region CSVs. Temp file and staging table are deleted immediately after.
+2. **Create ingestion table** — For each service with new data, fetches column headers from all region CSVs concurrently (`_fetch_all_columns`), unions them into a single staging column list, resolves collisions into a deduplicated ingestion column list, then generates DDL via `build_schema_sql()` and executes it directly to the DB (`DROP … CASCADE` then `CREATE TABLE` + `CREATE INDEX`). No schema file is read or written.
+3. **Download & load** — Streams each region CSV, skips the first 6 lines (5 metadata + 1 header), writes data rows to a temp file, then `COPY … FROM STDIN` into a temporary `UNLOGGED` staging table (created explicitly with all staging columns including collision suffixes). Rows are then merged into the ingestion table via `INSERT … SELECT … ON CONFLICT (rate_code) DO NOTHING`, with `COALESCE` expressions collapsing colliding staging columns into their single ingestion column. This also handles global items (e.g. `Global-Penetration-Testing`) that appear identically in multiple region CSVs. Temp file and staging table are deleted immediately after.
 4. **Table swap** — After all regions for a service are loaded: renames the existing production table to `drop_{name}`, renames `{name}_ingestion` to `{name}`, then drops `drop_{name}`. First-run safe (`ALTER TABLE IF EXISTS`).
 5. **Version record** — Upserts the loaded `(name, version)` into `aws_pricing_list_versions`.
 
@@ -97,6 +97,7 @@ migrations/              # Versioned SQL migration files, applied in filename or
 - Column types: most columns are `TEXT`; overrides in `_COLUMN_TYPE_MAPPINGS` in `schema_builder.py` (e.g., `price_per_unit` → `DECIMAL(20,10)`, `effective_date` → `DATE`)
 - `rate_code` gets `PRIMARY KEY`
 - `sku`, `region_code`, `discounted_region_code` get indexes; index names are capped at 63 chars (PostgreSQL limit) with MD5 hash suffix if needed
+- **Column collision handling** — Some AWS CSVs contain multiple columns that normalise to the same snake_case name (e.g. AWSBackup's `StorageType` and `Storage Type` both become `storage_type`). These are detected during header parsing (`get_csv_column_names`): the staging representation assigns `_2`/`_3` suffixes to preserve CSV column positions for `COPY`; the ingestion table schema keeps only the base name. During the staging→ingestion `INSERT`, a `COALESCE` expression merges the suffix variants back into the single base column.
 - In load mode, DDL is executed directly to the DB; in listing mode, DDL is written to `schema/`
 
 ## DB Migrations

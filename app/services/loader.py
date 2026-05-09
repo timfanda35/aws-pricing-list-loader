@@ -63,21 +63,27 @@ def _create_ingestion_table(conn, ingestion_table: str, columns: list[str], vers
     return ordered_columns
 
 
-def _fetch_all_columns(rows: list[dict]) -> tuple[list[str], dict[str, list[str]]]:
+def _fetch_all_columns(
+    rows: list[dict],
+) -> tuple[list[str], list[str], dict[str, list[str]], dict[str, list[str]]]:
+    """Return (staging_cols, ingestion_cols, merge_map, per_url_staging_cols)."""
     if not rows:
-        return [], {}
+        return [], [], {}, {}
 
     per_url: dict[str, list[str]] = {}
+    all_merge_maps: list[dict[str, list[str]]] = []
 
-    def fetch(csv_url: str) -> tuple[str, list[str]]:
-        return csv_url, get_csv_column_names(f"{BASE_URL}{csv_url}")
+    def fetch(csv_url: str) -> tuple[str, list[str], dict[str, list[str]]]:
+        cols, mm = get_csv_column_names(f"{BASE_URL}{csv_url}")
+        return csv_url, cols, mm
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = [executor.submit(fetch, row["csv_url"]) for row in rows]
         for future in as_completed(futures):
             try:
-                csv_url, cols = future.result()
+                csv_url, cols, mm = future.result()
                 per_url[csv_url] = cols
+                all_merge_maps.append(mm)
             except Exception as e:
                 print(f"[WARN] failed to fetch columns: {e}", file=sys.stderr)
 
@@ -89,8 +95,22 @@ def _fetch_all_columns(rows: list[dict]) -> tuple[list[str], dict[str, list[str]
             if col not in seen:
                 seen.add(col)
                 extras.append(col)
+    staging_cols = base + extras
 
-    return base + extras, per_url
+    merged_map: dict[str, list[str]] = {}
+    for mm in all_merge_maps:
+        for base_col, variants in mm.items():
+            if base_col not in merged_map:
+                merged_map[base_col] = list(variants)
+            else:
+                for c in variants:
+                    if c not in merged_map[base_col]:
+                        merged_map[base_col].append(c)
+
+    suffix_set = {c for variants in merged_map.values() for c in variants[1:]}
+    ingestion_cols = [c for c in staging_cols if c not in suffix_set]
+
+    return staging_cols, ingestion_cols, merged_map, per_url
 
 
 def _download_csv_strip_header(csv_url: str, dest_path: str) -> int:
@@ -106,26 +126,47 @@ def _download_csv_strip_header(csv_url: str, dest_path: str) -> int:
     return row_count
 
 
-def _copy_csv_to_table(conn, ingestion_table: str, columns: list[str], csv_path: str) -> None:
+def _copy_csv_to_table(
+    conn,
+    ingestion_table: str,
+    staging_columns: list[str],
+    merge_map: dict[str, list[str]],
+    csv_path: str,
+) -> None:
     staging_table = f"{ingestion_table}_staging"
-    col_list = ", ".join(f'"{c}"' for c in columns)
+
+    suffix_set = {c for variants in merge_map.values() for c in variants[1:]}
+    url_ingestion_cols = [c for c in staging_columns if c not in suffix_set]
+
+    staging_col_list = ", ".join(f'"{c}"' for c in staging_columns)
+    ingestion_col_list = ", ".join(f'"{c}"' for c in url_ingestion_cols)
+
+    staging_set = set(staging_columns)
+    select_exprs = []
+    for col in url_ingestion_cols:
+        variants = merge_map.get(col)
+        if variants and len(variants) > 1:
+            present = [v for v in variants if v in staging_set]
+            if len(present) > 1:
+                select_exprs.append("COALESCE(" + ", ".join(f'"{v}"' for v in present) + ")")
+                continue
+        select_exprs.append(f'"{col}"')
+    select_list = ", ".join(select_exprs)
 
     with conn.cursor() as cur:
         cur.execute(f'DROP TABLE IF EXISTS "{staging_table}"')
-        cur.execute(
-            f'CREATE UNLOGGED TABLE "{staging_table}" '
-            f'(LIKE "{ingestion_table}" INCLUDING DEFAULTS EXCLUDING CONSTRAINTS)'
-        )
+        col_defs = ", ".join(f'"{c}" TEXT' for c in staging_columns)
+        cur.execute(f'CREATE UNLOGGED TABLE "{staging_table}" ({col_defs})')
 
-    copy_sql = f'COPY "{staging_table}" ({col_list}) FROM STDIN WITH (FORMAT CSV, QUOTE \'"\');'
+    copy_sql = f'COPY "{staging_table}" ({staging_col_list}) FROM STDIN WITH (FORMAT CSV, QUOTE \'"\');'
     with open(csv_path, "rb") as f:
         with conn.cursor() as cur:
             cur.copy_expert(copy_sql, f)
 
     with conn.cursor() as cur:
         cur.execute(
-            f'INSERT INTO "{ingestion_table}" ({col_list}) '
-            f'SELECT {col_list} FROM "{staging_table}" '
+            f'INSERT INTO "{ingestion_table}" ({ingestion_col_list}) '
+            f'SELECT {select_list} FROM "{staging_table}" '
             f'ON CONFLICT (rate_code) DO NOTHING'
         )
         cur.execute(f'DROP TABLE IF EXISTS "{staging_table}"')
@@ -166,8 +207,8 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
     conn = get_db_conn()
     try:
         version = rows[0]["csv_url"].split("/")[5]
-        unioned_columns, per_url_columns = _fetch_all_columns(rows)
-        columns = _create_ingestion_table(conn, ingestion_table, unioned_columns, version)
+        staging_cols, ingestion_cols, merge_map, per_url_staging = _fetch_all_columns(rows)
+        _create_ingestion_table(conn, ingestion_table, ingestion_cols, version)
         print(f"[TABLE] created {ingestion_table}", file=sys.stderr)
 
         seen_versions: set[str] = set()
@@ -180,8 +221,8 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
                 with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
                     tmp_path = tmp.name
                 count = _download_csv_strip_header(csv_url, tmp_path)
-                url_columns = per_url_columns.get(csv_url, columns)
-                _copy_csv_to_table(conn, ingestion_table, url_columns, tmp_path)
+                url_staging_cols = per_url_staging.get(csv_url, staging_cols)
+                _copy_csv_to_table(conn, ingestion_table, url_staging_cols, merge_map, tmp_path)
                 print(f"[COPY] {name}/{region} → {ingestion_table} ({count} rows)", file=sys.stderr)
                 regions_loaded += 1
                 seen_versions.add(row_version)

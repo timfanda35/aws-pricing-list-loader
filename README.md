@@ -84,9 +84,9 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    L1["Check versions table\n(skip already-loaded)"] --> L2["Union columns from all region CSVs"]
-    L2 --> L3["CREATE TABLE {service}_ingestion"]
-    L3 --> L4["COPY each region CSV → staging table\n→ INSERT ON CONFLICT DO NOTHING → ingestion table"]
+    L1["Check versions table\n(skip already-loaded)"] --> L2["Union columns from all region CSVs\nresolve name collisions"]
+    L2 --> L3["CREATE TABLE {service}_ingestion\n(deduplicated columns)"]
+    L3 --> L4["COPY each region CSV → staging table\n→ INSERT with COALESCE merge\nON CONFLICT DO NOTHING → ingestion table"]
     L4 --> L5["Swap ingestion → production table"]
     L5 --> L6["Upsert version record"]
 ```
@@ -130,8 +130,8 @@ Already-loaded versions are skipped automatically (tracked in `aws_pricing_list_
 
 For each service with new data:
 
-1. Fetches column headers from all region CSVs concurrently and unions them into a single column list, then generates and executes a `CREATE TABLE` DDL directly to the DB. This ensures columns present in only some regions are included.
-2. Streams each region's CSV, strips the first 6 lines (metadata + header), and bulk-loads the data via `COPY … FROM STDIN` into a temporary `UNLOGGED` staging table (no PK constraint). Rows are then merged into the ingestion table with `INSERT … ON CONFLICT (rate_code) DO NOTHING`, so global items that appear identically in multiple region CSVs are silently deduplicated.
+1. Fetches column headers from all region CSVs concurrently and unions them. Columns that normalise to the same snake_case name (e.g. `StorageType` and `Storage Type` → `storage_type`) are detected as collisions: the staging representation uses `_2`/`_3` suffixes to preserve CSV positions, while the ingestion table schema keeps only the base name. Generates and executes a `CREATE TABLE` DDL directly to the DB.
+2. Streams each region's CSV, strips the first 6 lines (metadata + header), and bulk-loads via `COPY … FROM STDIN` into a temporary `UNLOGGED` staging table (created with all staging columns including collision suffixes). Rows are then merged into the ingestion table with `INSERT … SELECT … ON CONFLICT (rate_code) DO NOTHING`, using `COALESCE` to collapse suffix variants into a single column. Global items that appear identically in multiple region CSVs are silently deduplicated.
 3. Atomically swaps the ingestion table into production: renames the existing `{service}` table to `drop_{service}`, renames `{service}_ingestion` to `{service}`, then drops `drop_{service}`.
 4. Records the loaded version in `aws_pricing_list_versions` so subsequent runs skip it.
 
@@ -172,7 +172,8 @@ pytest tests/
 
 Covers:
 - `tests/test_aws_client.py` — `to_snake_case` with real AWS service names
-- `tests/test_schema_builder.py` — column type overrides, index name truncation, DDL generation
+- `tests/test_schema_builder.py` — column type overrides, index name truncation, DDL generation, collision detection and merge_map
+- `tests/test_loader.py` — column union, collision deduplication, COALESCE INSERT, staging/ingestion schema split
 - `tests/test_api.py` — all endpoints via FastAPI `TestClient` with mocked service layer
 - `tests/test_migrations.py` — migration runner: ordering, skip-applied, connection cleanup
 - `tests/test_main.py` — lifespan calls `run_migrations()` on startup
