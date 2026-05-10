@@ -1,0 +1,29 @@
+CREATE TABLE IF NOT EXISTS "AmazonTextract_ingestion" (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT PRIMARY KEY,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "group" TEXT,
+    "group_description" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "api_type" TEXT,
+    "entity_type" TEXT,
+    "plato_page_data_type" TEXT,
+    "pricing_unit" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT
+);
+CREATE INDEX IF NOT EXISTS AmazonTextract_20241029164050_sku ON "AmazonTextract_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AmazonTextract_20241029164050_region_code ON "AmazonTextract_ingestion" ("region_code");

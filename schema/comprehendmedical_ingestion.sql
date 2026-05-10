@@ -1,4 +1,4 @@
-CREATE TABLE comprehendmedical_ingestion (
+CREATE TABLE IF NOT EXISTS "comprehendmedical_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -20,5 +20,5 @@ CREATE TABLE comprehendmedical_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX comprehendmedical_20230209114538_sku ON comprehendmedical_ingestion (sku);
-CREATE INDEX comprehendmedical_20230209114538_region_code ON comprehendmedical_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS comprehendmedical_20230209114538_sku ON "comprehendmedical_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS comprehendmedical_20230209114538_region_code ON "comprehendmedical_ingestion" ("region_code");

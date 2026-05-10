@@ -1,4 +1,4 @@
-CREATE TABLE awselb_ingestion (
+CREATE TABLE IF NOT EXISTS "AWSELB_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -21,5 +21,5 @@ CREATE TABLE awselb_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX awselb_20260409193707_sku ON awselb_ingestion (sku);
-CREATE INDEX awselb_20260409193707_region_code ON awselb_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS AWSELB_20260507190131_sku ON "AWSELB_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSELB_20260507190131_region_code ON "AWSELB_ingestion" ("region_code");

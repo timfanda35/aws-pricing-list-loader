@@ -1,4 +1,4 @@
-CREATE TABLE ssmsap_ingestion (
+CREATE TABLE IF NOT EXISTS "SSMSAP_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -20,5 +20,5 @@ CREATE TABLE ssmsap_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX ssmsap_20250825201726_sku ON ssmsap_ingestion (sku);
-CREATE INDEX ssmsap_20250825201726_region_code ON ssmsap_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS SSMSAP_20250825201726_sku ON "SSMSAP_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS SSMSAP_20250825201726_region_code ON "SSMSAP_ingestion" ("region_code");

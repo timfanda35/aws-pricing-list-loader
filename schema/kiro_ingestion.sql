@@ -1,4 +1,4 @@
-CREATE TABLE kiro_ingestion (
+CREATE TABLE IF NOT EXISTS "Kiro_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -29,5 +29,5 @@ CREATE TABLE kiro_ingestion (
     "usage_quota_credits" TEXT,
     "usage_quota_unit_credits" TEXT
 );
-CREATE INDEX kiro_20260414131706_sku ON kiro_ingestion (sku);
-CREATE INDEX kiro_20260414131706_region_code ON kiro_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS Kiro_20260414131706_sku ON "Kiro_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS Kiro_20260414131706_region_code ON "Kiro_ingestion" ("region_code");

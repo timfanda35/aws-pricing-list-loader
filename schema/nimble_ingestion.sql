@@ -1,4 +1,4 @@
-CREATE TABLE nimble_ingestion (
+CREATE TABLE IF NOT EXISTS "nimble_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -33,5 +33,5 @@ CREATE TABLE nimble_ingestion (
     "service_name" TEXT,
     "volume_api_name" TEXT
 );
-CREATE INDEX nimble_20221221201025_sku ON nimble_ingestion (sku);
-CREATE INDEX nimble_20221221201025_region_code ON nimble_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS nimble_20221221201025_sku ON "nimble_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS nimble_20221221201025_region_code ON "nimble_ingestion" ("region_code");

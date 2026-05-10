@@ -1,0 +1,32 @@
+CREATE TABLE IF NOT EXISTS "AmazonEKS_ingestion" (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT PRIMARY KEY,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "tenancy" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "capability_type" TEXT,
+    "cpu_type" TEXT,
+    "eks_capability_units" TEXT,
+    "eks_product_type" TEXT,
+    "instance_type" TEXT,
+    "memory_type" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT,
+    "storage_type" TEXT,
+    "tier_type" TEXT
+);
+CREATE INDEX IF NOT EXISTS AmazonEKS_20260428235656_sku ON "AmazonEKS_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AmazonEKS_20260428235656_region_code ON "AmazonEKS_ingestion" ("region_code");

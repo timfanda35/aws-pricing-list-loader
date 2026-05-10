@@ -1,4 +1,4 @@
-CREATE TABLE datapipeline_ingestion (
+CREATE TABLE IF NOT EXISTS "datapipeline_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -24,5 +24,5 @@ CREATE TABLE datapipeline_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX datapipeline_20230110165411_sku ON datapipeline_ingestion (sku);
-CREATE INDEX datapipeline_20230110165411_region_code ON datapipeline_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS datapipeline_20230110165411_sku ON "datapipeline_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS datapipeline_20230110165411_region_code ON "datapipeline_ingestion" ("region_code");

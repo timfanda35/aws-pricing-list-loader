@@ -1,4 +1,4 @@
-CREATE TABLE translate_ingestion (
+CREATE TABLE IF NOT EXISTS "translate_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -22,5 +22,5 @@ CREATE TABLE translate_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX translate_20230720005517_sku ON translate_ingestion (sku);
-CREATE INDEX translate_20230720005517_region_code ON translate_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS translate_20230720005517_sku ON "translate_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS translate_20230720005517_region_code ON "translate_ingestion" ("region_code");

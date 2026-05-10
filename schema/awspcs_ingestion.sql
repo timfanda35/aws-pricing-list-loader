@@ -1,4 +1,4 @@
-CREATE TABLE awspcs_ingestion (
+CREATE TABLE IF NOT EXISTS "AWSPCS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -24,5 +24,5 @@ CREATE TABLE awspcs_ingestion (
     "scheduler_type" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX awspcs_20260423135432_sku ON awspcs_ingestion (sku);
-CREATE INDEX awspcs_20260423135432_region_code ON awspcs_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS AWSPCS_20260423135432_sku ON "AWSPCS_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSPCS_20260423135432_region_code ON "AWSPCS_ingestion" ("region_code");

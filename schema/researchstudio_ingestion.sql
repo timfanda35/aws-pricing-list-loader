@@ -1,4 +1,4 @@
-CREATE TABLE researchstudio_ingestion (
+CREATE TABLE IF NOT EXISTS "researchstudio_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -29,5 +29,5 @@ CREATE TABLE researchstudio_ingestion (
     "usage_quota_experiment_units" TEXT,
     "usage_quota_unit_experiment_units" TEXT
 );
-CREATE INDEX researchstudio_20260414131736_sku ON researchstudio_ingestion (sku);
-CREATE INDEX researchstudio_20260414131736_region_code ON researchstudio_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS researchstudio_20260414131736_sku ON "researchstudio_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS researchstudio_20260414131736_region_code ON "researchstudio_ingestion" ("region_code");

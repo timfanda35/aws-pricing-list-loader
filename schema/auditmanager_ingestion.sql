@@ -1,4 +1,4 @@
-CREATE TABLE auditmanager_ingestion (
+CREATE TABLE IF NOT EXISTS "auditmanager_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -20,5 +20,5 @@ CREATE TABLE auditmanager_ingestion (
     "resource_assessment" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX auditmanager_20230209151230_sku ON auditmanager_ingestion (sku);
-CREATE INDEX auditmanager_20230209151230_region_code ON auditmanager_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS auditmanager_20230209151230_sku ON "auditmanager_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS auditmanager_20230209151230_region_code ON "auditmanager_ingestion" ("region_code");

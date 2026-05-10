@@ -1,4 +1,4 @@
-CREATE TABLE a4b_ingestion (
+CREATE TABLE IF NOT EXISTS "A4B_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -21,5 +21,5 @@ CREATE TABLE a4b_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX a4b_20230428170723_sku ON a4b_ingestion (sku);
-CREATE INDEX a4b_20230428170723_region_code ON a4b_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS A4B_20230428170723_sku ON "A4B_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS A4B_20230428170723_region_code ON "A4B_ingestion" ("region_code");

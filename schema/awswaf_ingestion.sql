@@ -1,4 +1,4 @@
-CREATE TABLE awswaf_ingestion (
+CREATE TABLE IF NOT EXISTS "awswaf_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -22,5 +22,5 @@ CREATE TABLE awswaf_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX awswaf_20260107213453_sku ON awswaf_ingestion (sku);
-CREATE INDEX awswaf_20260107213453_region_code ON awswaf_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS awswaf_20260107213453_sku ON "awswaf_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS awswaf_20260107213453_region_code ON "awswaf_ingestion" ("region_code");

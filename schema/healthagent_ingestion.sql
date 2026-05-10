@@ -1,4 +1,4 @@
-CREATE TABLE healthagent_ingestion (
+CREATE TABLE IF NOT EXISTS "healthagent_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -20,5 +20,5 @@ CREATE TABLE healthagent_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX healthagent_20260304224625_sku ON healthagent_ingestion (sku);
-CREATE INDEX healthagent_20260304224625_region_code ON healthagent_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS healthagent_20260304224625_sku ON "healthagent_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS healthagent_20260304224625_region_code ON "healthagent_ingestion" ("region_code");

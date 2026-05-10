@@ -1,4 +1,4 @@
-CREATE TABLE transcribe_ingestion (
+CREATE TABLE IF NOT EXISTS "transcribe_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -20,5 +20,5 @@ CREATE TABLE transcribe_ingestion (
     "service_name" TEXT,
     "supported_modes" TEXT
 );
-CREATE INDEX transcribe_20260331003333_sku ON transcribe_ingestion (sku);
-CREATE INDEX transcribe_20260331003333_region_code ON transcribe_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS transcribe_20260331003333_sku ON "transcribe_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS transcribe_20260331003333_region_code ON "transcribe_ingestion" ("region_code");

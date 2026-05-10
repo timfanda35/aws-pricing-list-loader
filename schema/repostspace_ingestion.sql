@@ -1,4 +1,4 @@
-CREATE TABLE repostspace_ingestion (
+CREATE TABLE IF NOT EXISTS "repostspace_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -20,5 +20,5 @@ CREATE TABLE repostspace_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX repostspace_20260302155457_sku ON repostspace_ingestion (sku);
-CREATE INDEX repostspace_20260302155457_region_code ON repostspace_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS repostspace_20260302155457_sku ON "repostspace_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS repostspace_20260302155457_region_code ON "repostspace_ingestion" ("region_code");

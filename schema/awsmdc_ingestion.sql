@@ -1,4 +1,4 @@
-CREATE TABLE awsmdc_ingestion (
+CREATE TABLE IF NOT EXISTS "AWSMDC_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
     "rate_code" TEXT PRIMARY KEY,
@@ -23,5 +23,5 @@ CREATE TABLE awsmdc_ingestion (
     "region_code" TEXT,
     "service_name" TEXT
 );
-CREATE INDEX awsmdc_20260415142055_sku ON awsmdc_ingestion (sku);
-CREATE INDEX awsmdc_20260415142055_region_code ON awsmdc_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS AWSMDC_20260415142055_sku ON "AWSMDC_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSMDC_20260415142055_region_code ON "AWSMDC_ingestion" ("region_code");
