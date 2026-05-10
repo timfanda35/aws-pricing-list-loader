@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "ElasticMapReduce_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS "ElasticMapReduce_ingestion" (
     "meter_unit" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "software_type" TEXT
+    "software_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS ElasticMapReduce_20260505064057_sku ON "ElasticMapReduce_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS ElasticMapReduce_20260505064057_region_code ON "ElasticMapReduce_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS ElasticMapReduce_20260505064057_pricing_region ON "ElasticMapReduce_ingestion" ("pricing_region");

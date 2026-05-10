@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSGroundStation_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "AWSGroundStation_ingestion" (
     "ground_station" TEXT,
     "on_demand" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSGroundStation_20241205002702_sku ON "AWSGroundStation_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSGroundStation_20241205002702_region_code ON "AWSGroundStation_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSGroundStation_20241205002702_pricing_region ON "AWSGroundStation_ingestion" ("pricing_region");

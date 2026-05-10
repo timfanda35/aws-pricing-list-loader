@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "ContactLensAmazonConnect_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "ContactLensAmazonConnect_ingestion" (
     "analytics_type" TEXT,
     "max_package" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS ContactLensAmazonConnect_20250729201501_sku ON "ContactLensAmazonConnect_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS ContactLensAmazonConnect_20250729201501_region_code ON "ContactLensAmazonConnect_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS ContactLensAmazonConnect_20250729201501_pricing_region ON "ContactLensAmazonConnect_ingestion" ("pricing_region");

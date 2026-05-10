@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonOmics_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -32,7 +32,10 @@ CREATE TABLE IF NOT EXISTS "AmazonOmics_ingestion" (
     "region_code" TEXT,
     "resource_type" TEXT,
     "service_name" TEXT,
-    "workflow_type" TEXT
+    "workflow_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonOmics_20250903193809_sku ON "AmazonOmics_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonOmics_20250903193809_region_code ON "AmazonOmics_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonOmics_20250903193809_pricing_region ON "AmazonOmics_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonWorkLink_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AmazonWorkLink_ingestion" (
     "operation" TEXT,
     "deployment_model" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonWorkLink_20220721173205_sku ON "AmazonWorkLink_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonWorkLink_20220721173205_region_code ON "AmazonWorkLink_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonWorkLink_20220721173205_pricing_region ON "AmazonWorkLink_ingestion" ("pricing_region");

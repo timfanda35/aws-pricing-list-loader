@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "IngestionServiceSnowball_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -34,7 +34,10 @@ CREATE TABLE IF NOT EXISTS "IngestionServiceSnowball_ingestion" (
     "release_type" TEXT,
     "service_name" TEXT,
     "snowball_type" TEXT,
-    "to_region_code" TEXT
+    "to_region_code" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS IngestionServiceSnowball_20251218221255_sku ON "IngestionServiceSnowball_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS IngestionServiceSnowball_20251218221255_region_code ON "IngestionServiceSnowball_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS IngestionServiceSnowball_20251218221255_pricing_region ON "IngestionServiceSnowball_ingestion" ("pricing_region");

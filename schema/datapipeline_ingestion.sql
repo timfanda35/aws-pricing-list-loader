@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "datapipeline_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "datapipeline_ingestion" (
     "execution_location" TEXT,
     "frequency_mode" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS datapipeline_20230110165411_sku ON "datapipeline_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS datapipeline_20230110165411_region_code ON "datapipeline_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS datapipeline_20230110165411_pricing_region ON "datapipeline_ingestion" ("pricing_region");

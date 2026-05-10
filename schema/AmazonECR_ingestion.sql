@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonECR_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AmazonECR_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "storage_type" TEXT
+    "storage_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonECR_20251121153639_sku ON "AmazonECR_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonECR_20251121153639_region_code ON "AmazonECR_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonECR_20251121153639_pricing_region ON "AmazonECR_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonNeptune_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -41,7 +41,10 @@ CREATE TABLE IF NOT EXISTS "AmazonNeptune_ingestion" (
     "m_ncu" TEXT,
     "normalization_size_factor" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonNeptune_20260313140701_sku ON "AmazonNeptune_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonNeptune_20260313140701_region_code ON "AmazonNeptune_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonNeptune_20260313140701_pricing_region ON "AmazonNeptune_ingestion" ("pricing_region");

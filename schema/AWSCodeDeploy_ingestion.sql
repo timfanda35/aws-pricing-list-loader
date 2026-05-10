@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSCodeDeploy_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AWSCodeDeploy_ingestion" (
     "operation" TEXT,
     "deployment_location" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSCodeDeploy_20240821174641_sku ON "AWSCodeDeploy_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSCodeDeploy_20240821174641_region_code ON "AWSCodeDeploy_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSCodeDeploy_20240821174641_pricing_region ON "AWSCodeDeploy_ingestion" ("pricing_region");

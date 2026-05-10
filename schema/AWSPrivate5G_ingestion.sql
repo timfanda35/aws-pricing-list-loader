@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSPrivate5G_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AWSPrivate5G_ingestion" (
     "capability" TEXT,
     "commitment_days" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSPrivate5G_20230628174401_sku ON "AWSPrivate5G_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSPrivate5G_20230628174401_region_code ON "AWSPrivate5G_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSPrivate5G_20230628174401_pricing_region ON "AWSPrivate5G_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonPrometheus_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AmazonPrometheus_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonPrometheus_20250915214233_sku ON "AmazonPrometheus_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonPrometheus_20250915214233_region_code ON "AmazonPrometheus_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonPrometheus_20250915214233_pricing_region ON "AmazonPrometheus_ingestion" ("pricing_region");

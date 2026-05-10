@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonDeadline_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -27,7 +27,10 @@ CREATE TABLE IF NOT EXISTS "AmazonDeadline_ingestion" (
     "licensed_product" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "worker_location" TEXT
+    "worker_location" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonDeadline_20260508180547_sku ON "AmazonDeadline_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonDeadline_20260508180547_region_code ON "AmazonDeadline_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonDeadline_20260508180547_pricing_region ON "AmazonDeadline_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSDataSync_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AWSDataSync_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "task_mode" TEXT,
-    "task_type" TEXT
+    "task_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSDataSync_20250925180219_sku ON "AWSDataSync_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSDataSync_20250925180219_region_code ON "AWSDataSync_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSDataSync_20250925180219_pricing_region ON "AWSDataSync_ingestion" ("pricing_region");

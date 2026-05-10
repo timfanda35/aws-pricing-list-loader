@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSGreengrass_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AWSGreengrass_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "tenancy_support" TEXT
+    "tenancy_support" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSGreengrass_20250729203248_sku ON "AWSGreengrass_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSGreengrass_20250729203248_region_code ON "AWSGreengrass_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSGreengrass_20250729203248_pricing_region ON "AWSGreengrass_ingestion" ("pricing_region");

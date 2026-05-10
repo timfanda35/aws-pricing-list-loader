@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonETS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AmazonETS_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "transcoding_result" TEXT,
-    "video_resolution" TEXT
+    "video_resolution" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonETS_20230110161844_sku ON "AmazonETS_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonETS_20230110161844_region_code ON "AmazonETS_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonETS_20230110161844_pricing_region ON "AmazonETS_ingestion" ("pricing_region");

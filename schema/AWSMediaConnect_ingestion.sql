@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSMediaConnect_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -29,7 +29,10 @@ CREATE TABLE IF NOT EXISTS "AWSMediaConnect_ingestion" (
     "reserved_tier" TEXT,
     "router_transfer_type" TEXT,
     "service_name" TEXT,
-    "to_region_code" TEXT
+    "to_region_code" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSMediaConnect_20260130171842_sku ON "AWSMediaConnect_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSMediaConnect_20260130171842_region_code ON "AWSMediaConnect_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSMediaConnect_20260130171842_pricing_region ON "AWSMediaConnect_ingestion" ("pricing_region");

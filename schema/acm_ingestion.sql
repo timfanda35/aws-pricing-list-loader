@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "ACM_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "ACM_ingestion" (
     "certificate_export_type" TEXT,
     "certificate_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS ACM_20260218141316_sku ON "ACM_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS ACM_20260218141316_region_code ON "ACM_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS ACM_20260218141316_pricing_region ON "ACM_ingestion" ("pricing_region");

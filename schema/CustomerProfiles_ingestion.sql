@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "CustomerProfiles_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "CustomerProfiles_ingestion" (
     "operation" TEXT,
     "locke_profiles" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS CustomerProfiles_20241217135817_sku ON "CustomerProfiles_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS CustomerProfiles_20241217135817_region_code ON "CustomerProfiles_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS CustomerProfiles_20241217135817_pricing_region ON "CustomerProfiles_ingestion" ("pricing_region");

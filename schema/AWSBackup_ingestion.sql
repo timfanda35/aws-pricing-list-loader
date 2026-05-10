@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSBackup_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -26,7 +26,10 @@ CREATE TABLE IF NOT EXISTS "AWSBackup_ingestion" (
     "storage_tier" TEXT,
     "storage_type" TEXT,
     "to_region_code" TEXT,
-    "vault_type" TEXT
+    "vault_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSBackup_20260507171154_sku ON "AWSBackup_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSBackup_20260507171154_region_code ON "AWSBackup_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSBackup_20260507171154_pricing_region ON "AWSBackup_ingestion" ("pricing_region");

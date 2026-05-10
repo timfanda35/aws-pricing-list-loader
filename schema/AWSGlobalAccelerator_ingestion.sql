@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSGlobalAccelerator_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -29,7 +29,10 @@ CREATE TABLE IF NOT EXISTS "AWSGlobalAccelerator_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "to_region_code" TEXT,
-    "traffic_direction" TEXT
+    "traffic_direction" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSGlobalAccelerator_20230914175116_sku ON "AWSGlobalAccelerator_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSGlobalAccelerator_20230914175116_region_code ON "AWSGlobalAccelerator_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSGlobalAccelerator_20230914175116_pricing_region ON "AWSGlobalAccelerator_ingestion" ("pricing_region");

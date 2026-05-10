@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "IoTTwinMaker_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "IoTTwinMaker_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "tiers" TEXT
+    "tiers" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS IoTTwinMaker_20231018161701_sku ON "IoTTwinMaker_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS IoTTwinMaker_20231018161701_region_code ON "IoTTwinMaker_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS IoTTwinMaker_20231018161701_pricing_region ON "IoTTwinMaker_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonMCS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AmazonMCS_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonMCS_20251105011301_sku ON "AmazonMCS_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonMCS_20251105011301_region_code ON "AmazonMCS_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonMCS_20251105011301_pricing_region ON "AmazonMCS_ingestion" ("pricing_region");

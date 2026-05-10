@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSIoT1Click_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSIoT1Click_ingestion" (
     "device" TEXT,
     "device_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSIoT1Click_20220204221101_sku ON "AWSIoT1Click_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSIoT1Click_20220204221101_region_code ON "AWSIoT1Click_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSIoT1Click_20220204221101_pricing_region ON "AWSIoT1Click_ingestion" ("pricing_region");

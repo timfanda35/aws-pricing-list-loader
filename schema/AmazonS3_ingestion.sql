@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonS3_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -33,7 +33,10 @@ CREATE TABLE IF NOT EXISTS "AmazonS3_ingestion" (
     "overhead" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "to_region_code" TEXT
+    "to_region_code" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonS3_20260427212459_sku ON "AmazonS3_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonS3_20260427212459_region_code ON "AmazonS3_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonS3_20260427212459_pricing_region ON "AmazonS3_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonDAX_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS "AmazonDAX_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonDAX_20250430174354_sku ON "AmazonDAX_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonDAX_20250430174354_region_code ON "AmazonDAX_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonDAX_20250430174354_pricing_region ON "AmazonDAX_ingestion" ("pricing_region");

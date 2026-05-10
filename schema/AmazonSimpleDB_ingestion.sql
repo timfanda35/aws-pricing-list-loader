@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonSimpleDB_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonSimpleDB_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonSimpleDB_20230131105538_sku ON "AmazonSimpleDB_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonSimpleDB_20230131105538_region_code ON "AmazonSimpleDB_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonSimpleDB_20230131105538_pricing_region ON "AmazonSimpleDB_ingestion" ("pricing_region");

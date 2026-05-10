@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSNetworkFirewall_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AWSNetworkFirewall_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "subcategory" TEXT
+    "subcategory" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSNetworkFirewall_20260203015610_sku ON "AWSNetworkFirewall_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSNetworkFirewall_20260203015610_region_code ON "AWSNetworkFirewall_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSNetworkFirewall_20260203015610_pricing_region ON "AWSNetworkFirewall_ingestion" ("pricing_region");

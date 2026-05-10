@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "OpsWorks_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "OpsWorks_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "server_location" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS OpsWorks_20221216122723_sku ON "OpsWorks_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS OpsWorks_20221216122723_region_code ON "OpsWorks_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS OpsWorks_20221216122723_pricing_region ON "OpsWorks_ingestion" ("pricing_region");

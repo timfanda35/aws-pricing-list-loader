@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSEvents_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AWSEvents_ingestion" (
     "invocation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "time_window" TEXT
+    "time_window" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSEvents_20260203185746_sku ON "AWSEvents_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSEvents_20260203185746_region_code ON "AWSEvents_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSEvents_20260203185746_pricing_region ON "AWSEvents_ingestion" ("pricing_region");

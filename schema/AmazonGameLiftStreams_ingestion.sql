@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonGameLiftStreams_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -24,7 +24,10 @@ CREATE TABLE IF NOT EXISTS "AmazonGameLiftStreams_ingestion" (
     "reservation_class" TEXT,
     "service_name" TEXT,
     "stream_class" TEXT,
-    "vram" TEXT
+    "vram" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonGameLiftStreams_20260304231114_sku ON "AmazonGameLiftStreams_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonGameLiftStreams_20260304231114_region_code ON "AmazonGameLiftStreams_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonGameLiftStreams_20260304231114_pricing_region ON "AmazonGameLiftStreams_ingestion" ("pricing_region");

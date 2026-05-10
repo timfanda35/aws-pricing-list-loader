@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonChimeDialInAMCS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AmazonChimeDialInAMCS_ingestion" (
     "primary_place_of_use" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "transaction_type" TEXT
+    "transaction_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonChimeDialInAMCS_20220311171413_sku ON "AmazonChimeDialInAMCS_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonChimeDialInAMCS_20220311171413_region_code ON "AmazonChimeDialInAMCS_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonChimeDialInAMCS_20220311171413_pricing_region ON "AmazonChimeDialInAMCS_ingestion" ("pricing_region");

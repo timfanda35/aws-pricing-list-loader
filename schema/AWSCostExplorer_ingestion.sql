@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSCostExplorer_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSCostExplorer_ingestion" (
     "granularity" TEXT,
     "region_code" TEXT,
     "request_type" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSCostExplorer_20250925213519_sku ON "AWSCostExplorer_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSCostExplorer_20250925213519_region_code ON "AWSCostExplorer_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSCostExplorer_20250925213519_pricing_region ON "AWSCostExplorer_ingestion" ("pricing_region");

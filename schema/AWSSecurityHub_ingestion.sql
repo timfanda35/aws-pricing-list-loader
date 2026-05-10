@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSSecurityHub_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -28,7 +28,10 @@ CREATE TABLE IF NOT EXISTS "AWSSecurityHub_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "standard_group" TEXT,
-    "standard_storage" TEXT
+    "standard_storage" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSSecurityHub_20260330170323_sku ON "AWSSecurityHub_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSSecurityHub_20260330170323_region_code ON "AWSSecurityHub_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSSecurityHub_20260330170323_pricing_region ON "AWSSecurityHub_ingestion" ("pricing_region");

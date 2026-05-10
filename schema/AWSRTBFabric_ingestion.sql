@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSRTBFabric_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSRTBFabric_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "transaction_network" TEXT
+    "transaction_network" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSRTBFabric_20251128184615_sku ON "AWSRTBFabric_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSRTBFabric_20251128184615_region_code ON "AWSRTBFabric_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSRTBFabric_20251128184615_pricing_region ON "AWSRTBFabric_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSSystemsManager_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS "AWSSystemsManager_ingestion" (
     "response" TEXT,
     "service_name" TEXT,
     "throughput" TEXT,
-    "updates" TEXT
+    "updates" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSSystemsManager_20250828153807_sku ON "AWSSystemsManager_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSSystemsManager_20250828153807_region_code ON "AWSSystemsManager_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSSystemsManager_20250828153807_pricing_region ON "AWSSystemsManager_ingestion" ("pricing_region");

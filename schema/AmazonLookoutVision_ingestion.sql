@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonLookoutVision_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AmazonLookoutVision_ingestion" (
     "operation" TEXT,
     "lookout_vision_image" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonLookoutVision_20230309234949_sku ON "AmazonLookoutVision_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonLookoutVision_20230309234949_region_code ON "AmazonLookoutVision_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonLookoutVision_20230309234949_pricing_region ON "AmazonLookoutVision_ingestion" ("pricing_region");

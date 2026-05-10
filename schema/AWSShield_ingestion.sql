@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSShield_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,6 +21,9 @@ CREATE TABLE IF NOT EXISTS "AWSShield_ingestion" (
     "from_region_code" TEXT,
     "resource_type" TEXT,
     "service_name" TEXT,
-    "to_region_code" TEXT
+    "to_region_code" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSShield_20250508181231_sku ON "AWSShield_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSShield_20250508181231_pricing_region ON "AWSShield_ingestion" ("pricing_region");

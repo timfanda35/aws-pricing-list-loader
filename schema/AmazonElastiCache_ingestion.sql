@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonElastiCache_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS "AmazonElastiCache_ingestion" (
     "normalization_size_factor" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "year_number" TEXT
+    "year_number" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonElastiCache_20260507182426_sku ON "AmazonElastiCache_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonElastiCache_20260507182426_region_code ON "AmazonElastiCache_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonElastiCache_20260507182426_pricing_region ON "AmazonElastiCache_ingestion" ("pricing_region");

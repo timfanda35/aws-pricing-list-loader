@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSAppRunner_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "AWSAppRunner_ingestion" (
     "pipeline" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "type" TEXT
+    "type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSAppRunner_20240126165719_sku ON "AWSAppRunner_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSAppRunner_20240126165719_region_code ON "AWSAppRunner_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSAppRunner_20240126165719_pricing_region ON "AWSAppRunner_ingestion" ("pricing_region");

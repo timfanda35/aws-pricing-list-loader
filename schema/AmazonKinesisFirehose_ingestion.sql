@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonKinesisFirehose_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AmazonKinesisFirehose_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "source_type" TEXT,
-    "ticket_type" TEXT
+    "ticket_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonKinesisFirehose_20251218180451_sku ON "AmazonKinesisFirehose_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonKinesisFirehose_20251218180451_region_code ON "AmazonKinesisFirehose_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonKinesisFirehose_20251218180451_pricing_region ON "AmazonKinesisFirehose_ingestion" ("pricing_region");

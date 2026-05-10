@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonRDS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -56,7 +56,10 @@ CREATE TABLE IF NOT EXISTS "AmazonRDS_ingestion" (
     "service_name" TEXT,
     "unbundled_licensing" TEXT,
     "volume_name" TEXT,
-    "windows_license_multiplier" TEXT
+    "windows_license_multiplier" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonRDS_20260508211654_sku ON "AmazonRDS_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonRDS_20260508211654_region_code ON "AmazonRDS_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonRDS_20260508211654_pricing_region ON "AmazonRDS_ingestion" ("pricing_region");

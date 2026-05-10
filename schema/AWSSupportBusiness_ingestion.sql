@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSSupportBusiness_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -32,7 +32,10 @@ CREATE TABLE IF NOT EXISTS "AWSSupportBusiness_ingestion" (
     "technical_support" TEXT,
     "third_party_software_support" TEXT,
     "training" TEXT,
-    "who_can_open_cases" TEXT
+    "who_can_open_cases" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSSupportBusiness_20251209151227_sku ON "AWSSupportBusiness_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSSupportBusiness_20251209151227_region_code ON "AWSSupportBusiness_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSSupportBusiness_20251209151227_pricing_region ON "AWSSupportBusiness_ingestion" ("pricing_region");

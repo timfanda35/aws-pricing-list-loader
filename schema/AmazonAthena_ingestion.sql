@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonAthena_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonAthena_ingestion" (
     "operation" TEXT,
     "free_query_types" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonAthena_20260327172219_sku ON "AmazonAthena_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonAthena_20260327172219_region_code ON "AmazonAthena_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonAthena_20260327172219_pricing_region ON "AmazonAthena_ingestion" ("pricing_region");

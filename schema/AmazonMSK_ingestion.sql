@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonMSK_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS "AmazonMSK_ingestion" (
     "memory_gi_b" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "storage_family" TEXT
+    "storage_family" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonMSK_20260422040553_sku ON "AmazonMSK_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonMSK_20260422040553_region_code ON "AmazonMSK_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonMSK_20260422040553_pricing_region ON "AmazonMSK_ingestion" ("pricing_region");

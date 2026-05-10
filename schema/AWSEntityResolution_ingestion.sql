@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSEntityResolution_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSEntityResolution_ingestion" (
     "operation_type" TEXT,
     "region_code" TEXT,
     "resolution_type" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSEntityResolution_20250513205946_sku ON "AWSEntityResolution_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSEntityResolution_20250513205946_region_code ON "AWSEntityResolution_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSEntityResolution_20250513205946_pricing_region ON "AWSEntityResolution_ingestion" ("pricing_region");

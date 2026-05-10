@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSOutposts_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -43,7 +43,10 @@ CREATE TABLE IF NOT EXISTS "AWSOutposts_ingestion" (
     "pre_installed_s_w" TEXT,
     "processor_features" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSOutposts_20251014223447_sku ON "AWSOutposts_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSOutposts_20251014223447_region_code ON "AWSOutposts_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSOutposts_20251014223447_pricing_region ON "AWSOutposts_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "CloudHSM_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "CloudHSM_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "trial_product" TEXT,
-    "upfront_commitment" TEXT
+    "upfront_commitment" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS CloudHSM_20260416190528_sku ON "CloudHSM_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS CloudHSM_20260416190528_region_code ON "CloudHSM_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS CloudHSM_20260416190528_pricing_region ON "CloudHSM_ingestion" ("pricing_region");

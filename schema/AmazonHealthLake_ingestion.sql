@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonHealthLake_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -25,7 +25,10 @@ CREATE TABLE IF NOT EXISTS "AmazonHealthLake_ingestion" (
     "region_code" TEXT,
     "resource_import" TEXT,
     "service_name" TEXT,
-    "storage_class" TEXT
+    "storage_class" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonHealthLake_20260203192959_sku ON "AmazonHealthLake_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonHealthLake_20260203192959_region_code ON "AmazonHealthLake_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonHealthLake_20260203192959_pricing_region ON "AmazonHealthLake_ingestion" ("pricing_region");

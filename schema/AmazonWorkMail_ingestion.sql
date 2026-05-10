@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonWorkMail_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonWorkMail_ingestion" (
     "free_tier" TEXT,
     "mailbox_storage" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonWorkMail_20230110161539_sku ON "AmazonWorkMail_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonWorkMail_20230110161539_region_code ON "AmazonWorkMail_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonWorkMail_20230110161539_pricing_region ON "AmazonWorkMail_ingestion" ("pricing_region");

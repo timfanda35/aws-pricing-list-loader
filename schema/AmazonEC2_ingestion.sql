@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonEC2_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -84,7 +84,10 @@ CREATE TABLE IF NOT EXISTS "AmazonEC2_ingestion" (
     "snapshot_archive_fee_type" TEXT,
     "to_region_code" TEXT,
     "volume_api_name" TEXT,
-    "vpc_networking_support" TEXT
+    "vpc_networking_support" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonEC2_20260507192915_sku ON "AmazonEC2_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonEC2_20260507192915_region_code ON "AmazonEC2_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonEC2_20260507192915_pricing_region ON "AmazonEC2_ingestion" ("pricing_region");

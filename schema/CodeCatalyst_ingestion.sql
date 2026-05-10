@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "CodeCatalyst_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -25,7 +25,10 @@ CREATE TABLE IF NOT EXISTS "CodeCatalyst_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "storage_type" TEXT,
-    "tier" TEXT
+    "tier" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS CodeCatalyst_20231122231921_sku ON "CodeCatalyst_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS CodeCatalyst_20231122231921_region_code ON "CodeCatalyst_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS CodeCatalyst_20231122231921_pricing_region ON "CodeCatalyst_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonEC2OCPULicenseFees_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AmazonEC2OCPULicenseFees_ingestion" (
     "instance_family_category" TEXT,
     "pre_installed_s_w" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonEC2OCPULicenseFees_20260506232301_sku ON "AmazonEC2OCPULicenseFees_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonEC2OCPULicenseFees_20260506232301_region_code ON "AmazonEC2OCPULicenseFees_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonEC2OCPULicenseFees_20260506232301_pricing_region ON "AmazonEC2OCPULicenseFees_ingestion" ("pricing_region");

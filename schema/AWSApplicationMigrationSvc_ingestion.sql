@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSApplicationMigrationSvc_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AWSApplicationMigrationSvc_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "replication_type" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSApplicationMigrationSvc_20260423191530_sku ON "AWSApplicationMigrationSvc_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSApplicationMigrationSvc_20260423191530_region_code ON "AWSApplicationMigrationSvc_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSApplicationMigrationSvc_20260423191530_pricing_region ON "AWSApplicationMigrationSvc_ingestion" ("pricing_region");

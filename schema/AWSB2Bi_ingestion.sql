@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSB2Bi_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AWSB2Bi_ingestion" (
     "output_format" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "type" TEXT
+    "type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSB2Bi_20260310141045_sku ON "AWSB2Bi_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSB2Bi_20260310141045_region_code ON "AWSB2Bi_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSB2Bi_20260310141045_pricing_region ON "AWSB2Bi_ingestion" ("pricing_region");

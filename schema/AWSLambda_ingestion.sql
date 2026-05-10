@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSLambda_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "AWSLambda_ingestion" (
     "lambda_managed_instances_request_type" TEXT,
     "lambda_managed_instance_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSLambda_20260428221602_sku ON "AWSLambda_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSLambda_20260428221602_region_code ON "AWSLambda_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSLambda_20260428221602_pricing_region ON "AWSLambda_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonTimestream_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -33,7 +33,10 @@ CREATE TABLE IF NOT EXISTS "AmazonTimestream_ingestion" (
     "disable_activation_confirmation_email" TEXT,
     "normalization_size_factor" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonTimestream_20260320000110_sku ON "AmazonTimestream_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonTimestream_20260320000110_region_code ON "AmazonTimestream_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonTimestream_20260320000110_pricing_region ON "AmazonTimestream_ingestion" ("pricing_region");

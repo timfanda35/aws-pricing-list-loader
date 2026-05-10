@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSMigrationHubRefactorSpaces_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSMigrationHubRefactorSpaces_ingestion" (
     "operation" TEXT,
     "product_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSMigrationHubRefactorSpaces_20230420130713_sku ON "AWSMigrationHubRefactorSpaces_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSMigrationHubRefactorSpaces_20230420130713_region_code ON "AWSMigrationHubRefactorSpaces_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSMigrationHubRefactorSpaces_20230420130713_pricing_region ON "AWSMigrationHubRefactorSpaces_ingestion" ("pricing_region");

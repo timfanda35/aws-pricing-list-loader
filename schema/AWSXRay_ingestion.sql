@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSXRay_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AWSXRay_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSXRay_20250828153810_sku ON "AWSXRay_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSXRay_20250828153810_region_code ON "AWSXRay_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSXRay_20250828153810_pricing_region ON "AWSXRay_ingestion" ("pricing_region");

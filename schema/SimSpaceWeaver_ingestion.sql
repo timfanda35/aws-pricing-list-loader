@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "SimSpaceWeaver_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "SimSpaceWeaver_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "sim_instance_family" TEXT,
-    "sim_instance_type" TEXT
+    "sim_instance_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS SimSpaceWeaver_20230607150705_sku ON "SimSpaceWeaver_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS SimSpaceWeaver_20230607150705_region_code ON "SimSpaceWeaver_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS SimSpaceWeaver_20230607150705_pricing_region ON "SimSpaceWeaver_ingestion" ("pricing_region");

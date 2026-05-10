@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonEVS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonEVS_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "subscription_model" TEXT
+    "subscription_model" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonEVS_20260420070511_sku ON "AmazonEVS_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonEVS_20260420070511_region_code ON "AmazonEVS_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonEVS_20260420070511_pricing_region ON "AmazonEVS_ingestion" ("pricing_region");

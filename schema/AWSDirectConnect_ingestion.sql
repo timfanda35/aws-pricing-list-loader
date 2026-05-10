@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSDirectConnect_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -24,6 +24,9 @@ CREATE TABLE IF NOT EXISTS "AWSDirectConnect_ingestion" (
     "service_name" TEXT,
     "to_region_code" TEXT,
     "version" TEXT,
-    "virtual_interface_type" TEXT
+    "virtual_interface_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSDirectConnect_20260427190731_sku ON "AWSDirectConnect_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSDirectConnect_20260427190731_pricing_region ON "AWSDirectConnect_ingestion" ("pricing_region");

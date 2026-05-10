@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSDatabaseMigrationSvc_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -38,7 +38,10 @@ CREATE TABLE IF NOT EXISTS "AWSDatabaseMigrationSvc_ingestion" (
     "processor_features" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "type" TEXT
+    "type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSDatabaseMigrationSvc_20251117230913_sku ON "AWSDatabaseMigrationSvc_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSDatabaseMigrationSvc_20251117230913_region_code ON "AWSDatabaseMigrationSvc_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSDatabaseMigrationSvc_20251117230913_pricing_region ON "AWSDatabaseMigrationSvc_ingestion" ("pricing_region");

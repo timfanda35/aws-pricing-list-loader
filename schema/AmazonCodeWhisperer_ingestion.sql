@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonCodeWhisperer_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AmazonCodeWhisperer_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "tier" TEXT
+    "tier" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonCodeWhisperer_20240708183536_sku ON "AmazonCodeWhisperer_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonCodeWhisperer_20240708183536_region_code ON "AmazonCodeWhisperer_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonCodeWhisperer_20240708183536_pricing_region ON "AmazonCodeWhisperer_ingestion" ("pricing_region");

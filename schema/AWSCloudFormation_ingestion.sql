@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSCloudFormation_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AWSCloudFormation_ingestion" (
     "operation" TEXT,
     "cloud_formation_resource_provider" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSCloudFormation_20250828180213_sku ON "AWSCloudFormation_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSCloudFormation_20250828180213_region_code ON "AWSCloudFormation_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSCloudFormation_20250828180213_pricing_region ON "AWSCloudFormation_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonDocDB_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -40,7 +40,10 @@ CREATE TABLE IF NOT EXISTS "AmazonDocDB_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "storage_type" TEXT,
-    "volume_optimization" TEXT
+    "volume_optimization" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonDocDB_20260507170359_sku ON "AmazonDocDB_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonDocDB_20260507170359_region_code ON "AmazonDocDB_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonDocDB_20260507170359_pricing_region ON "AmazonDocDB_ingestion" ("pricing_region");

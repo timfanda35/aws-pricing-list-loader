@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "A4B_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "A4B_ingestion" (
     "deployment_model" TEXT,
     "deployment_model_description" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS A4B_20230428170723_sku ON "A4B_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS A4B_20230428170723_region_code ON "A4B_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS A4B_20230428170723_pricing_region ON "A4B_ingestion" ("pricing_region");

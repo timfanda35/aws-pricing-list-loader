@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSEndUserMessaging3pFees_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AWSEndUserMessaging3pFees_ingestion" (
     "message_fee" TEXT,
     "message_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSEndUserMessaging3pFees_20260420032436_sku ON "AWSEndUserMessaging3pFees_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSEndUserMessaging3pFees_20260420032436_region_code ON "AWSEndUserMessaging3pFees_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSEndUserMessaging3pFees_20260420032436_pricing_region ON "AWSEndUserMessaging3pFees_ingestion" ("pricing_region");

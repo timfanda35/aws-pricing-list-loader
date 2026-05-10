@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonDevOpsGuru_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonDevOpsGuru_ingestion" (
     "api_calls" TEXT,
     "region_code" TEXT,
     "resource_price_group" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonDevOpsGuru_20220906172511_sku ON "AmazonDevOpsGuru_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonDevOpsGuru_20220906172511_region_code ON "AmazonDevOpsGuru_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonDevOpsGuru_20220906172511_pricing_region ON "AmazonDevOpsGuru_ingestion" ("pricing_region");

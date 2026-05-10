@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonLocationService_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AmazonLocationService_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "sub_service" TEXT,
-    "type" TEXT
+    "type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonLocationService_20260421211408_sku ON "AmazonLocationService_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonLocationService_20260421211408_region_code ON "AmazonLocationService_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonLocationService_20260421211408_pricing_region ON "AmazonLocationService_ingestion" ("pricing_region");

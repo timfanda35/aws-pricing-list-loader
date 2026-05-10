@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSInterconnect_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -24,7 +24,10 @@ CREATE TABLE IF NOT EXISTS "AWSInterconnect_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "to_region_name" TEXT,
-    "traffic_direction" TEXT
+    "traffic_direction" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSInterconnect_20260414235556_sku ON "AWSInterconnect_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSInterconnect_20260414235556_region_code ON "AWSInterconnect_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSInterconnect_20260414235556_pricing_region ON "AWSInterconnect_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonCloudFront_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -28,7 +28,10 @@ CREATE TABLE IF NOT EXISTS "AmazonCloudFront_ingestion" (
     "request_description" TEXT,
     "request_type" TEXT,
     "service_name" TEXT,
-    "to_region_code" TEXT
+    "to_region_code" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonCloudFront_20250701211647_sku ON "AmazonCloudFront_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonCloudFront_20250701211647_region_code ON "AmazonCloudFront_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonCloudFront_20250701211647_pricing_region ON "AmazonCloudFront_ingestion" ("pricing_region");

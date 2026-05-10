@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonRedshift_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -31,7 +31,10 @@ CREATE TABLE IF NOT EXISTS "AmazonRedshift_ingestion" (
     "ecu" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "usage_family" TEXT
+    "usage_family" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonRedshift_20260508160658_sku ON "AmazonRedshift_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonRedshift_20260508160658_region_code ON "AmazonRedshift_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonRedshift_20260508160658_pricing_region ON "AmazonRedshift_ingestion" ("pricing_region");

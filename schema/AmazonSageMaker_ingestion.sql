@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonSageMaker_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -54,7 +54,10 @@ CREATE TABLE IF NOT EXISTS "AmazonSageMaker_ingestion" (
     "tracking_server_size" TEXT,
     "unified_studio_compute" TEXT,
     "v_cpu" TEXT,
-    "workforce_type" TEXT
+    "workforce_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonSageMaker_20260508220240_sku ON "AmazonSageMaker_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonSageMaker_20260508220240_region_code ON "AmazonSageMaker_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonSageMaker_20260508220240_pricing_region ON "AmazonSageMaker_ingestion" ("pricing_region");

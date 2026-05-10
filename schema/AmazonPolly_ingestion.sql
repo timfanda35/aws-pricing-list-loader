@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonPolly_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "AmazonPolly_ingestion" (
     "operation" TEXT,
     "engine" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonPolly_20260323164833_sku ON "AmazonPolly_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonPolly_20260323164833_region_code ON "AmazonPolly_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonPolly_20260323164833_pricing_region ON "AmazonPolly_ingestion" ("pricing_region");

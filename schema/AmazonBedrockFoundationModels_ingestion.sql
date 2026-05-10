@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonBedrockFoundationModels_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -15,7 +15,10 @@ CREATE TABLE IF NOT EXISTS "AmazonBedrockFoundationModels_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonBedrockFoundationModels_20260501202025_sku ON "AmazonBedrockFoundationModels_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonBedrockFoundationModels_20260501202025_region_code ON "AmazonBedrockFoundationModels_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonBedrockFoundationModels_20260501202025_pricing_region ON "AmazonBedrockFoundationModels_ingestion" ("pricing_region");

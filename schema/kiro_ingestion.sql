@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "Kiro_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -27,7 +27,10 @@ CREATE TABLE IF NOT EXISTS "Kiro_ingestion" (
     "service_name" TEXT,
     "usage_pooling_policy_credits" TEXT,
     "usage_quota_credits" TEXT,
-    "usage_quota_unit_credits" TEXT
+    "usage_quota_unit_credits" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS Kiro_20260414131706_sku ON "Kiro_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS Kiro_20260414131706_region_code ON "Kiro_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS Kiro_20260414131706_pricing_region ON "Kiro_ingestion" ("pricing_region");

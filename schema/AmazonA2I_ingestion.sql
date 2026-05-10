@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonA2I_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS "AmazonA2I_ingestion" (
     "integrating_service" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "workforce_type" TEXT
+    "workforce_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonA2I_20220630153310_sku ON "AmazonA2I_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonA2I_20220630153310_region_code ON "AmazonA2I_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonA2I_20220630153310_pricing_region ON "AmazonA2I_ingestion" ("pricing_region");

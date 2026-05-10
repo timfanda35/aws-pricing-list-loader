@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonLightsail_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -40,7 +40,10 @@ CREATE TABLE IF NOT EXISTS "AmazonLightsail_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "storage_capacity_quota" TEXT,
-    "to_region_code" TEXT
+    "to_region_code" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonLightsail_20260410200730_sku ON "AmazonLightsail_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonLightsail_20260410200730_region_code ON "AmazonLightsail_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonLightsail_20260410200730_pricing_region ON "AmazonLightsail_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSElementalInference_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSElementalInference_ingestion" (
     "feature_mode" TEXT,
     "features_used" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSElementalInference_20260506070205_sku ON "AWSElementalInference_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSElementalInference_20260506070205_region_code ON "AWSElementalInference_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSElementalInference_20260506070205_pricing_region ON "AWSElementalInference_ingestion" ("pricing_region");

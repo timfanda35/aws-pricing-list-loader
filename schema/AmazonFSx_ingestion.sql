@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonFSx_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -26,7 +26,10 @@ CREATE TABLE IF NOT EXISTS "AmazonFSx_ingestion" (
     "service_name" TEXT,
     "storage_tier" TEXT,
     "storage_type" TEXT,
-    "throughput_capacity" TEXT
+    "throughput_capacity" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonFSx_20260505005708_sku ON "AmazonFSx_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonFSx_20260505005708_region_code ON "AmazonFSx_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonFSx_20260505005708_pricing_region ON "AmazonFSx_ingestion" ("pricing_region");

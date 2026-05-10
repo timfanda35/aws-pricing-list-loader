@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSStorageGateway_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS "AWSStorageGateway_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "storage_description" TEXT,
-    "version" TEXT
+    "version" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSStorageGateway_20251009170740_sku ON "AWSStorageGateway_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSStorageGateway_20251009170740_region_code ON "AWSStorageGateway_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSStorageGateway_20251009170740_pricing_region ON "AWSStorageGateway_ingestion" ("pricing_region");

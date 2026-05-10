@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonQuickSuite_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -34,7 +34,10 @@ CREATE TABLE IF NOT EXISTS "AmazonQuickSuite_ingestion" (
     "usage_quota_agent_hour" TEXT,
     "usage_quota_index_capacity" TEXT,
     "usage_quota_unit_agent_hour" TEXT,
-    "usage_quota_unit_index_capacity" TEXT
+    "usage_quota_unit_index_capacity" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonQuickSuite_20260428154623_sku ON "AmazonQuickSuite_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonQuickSuite_20260428154623_region_code ON "AmazonQuickSuite_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonQuickSuite_20260428154623_pricing_region ON "AmazonQuickSuite_ingestion" ("pricing_region");

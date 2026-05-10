@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "researchstudio_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -27,7 +27,10 @@ CREATE TABLE IF NOT EXISTS "researchstudio_ingestion" (
     "service_name" TEXT,
     "usage_pooling_policy_experiment_units" TEXT,
     "usage_quota_experiment_units" TEXT,
-    "usage_quota_unit_experiment_units" TEXT
+    "usage_quota_unit_experiment_units" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS researchstudio_20260414131736_sku ON "researchstudio_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS researchstudio_20260414131736_region_code ON "researchstudio_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS researchstudio_20260414131736_pricing_region ON "researchstudio_ingestion" ("pricing_region");

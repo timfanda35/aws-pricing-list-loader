@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonStates_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AmazonStates_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonStates_20250828153904_sku ON "AmazonStates_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonStates_20250828153904_region_code ON "AmazonStates_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonStates_20250828153904_pricing_region ON "AmazonStates_ingestion" ("pricing_region");

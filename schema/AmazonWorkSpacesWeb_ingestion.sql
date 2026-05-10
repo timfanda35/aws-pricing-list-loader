@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonWorkSpacesWeb_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonWorkSpacesWeb_ingestion" (
     "bundle" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "size" TEXT
+    "size" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonWorkSpacesWeb_20260217235106_sku ON "AmazonWorkSpacesWeb_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonWorkSpacesWeb_20260217235106_region_code ON "AmazonWorkSpacesWeb_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonWorkSpacesWeb_20260217235106_pricing_region ON "AmazonWorkSpacesWeb_ingestion" ("pricing_region");

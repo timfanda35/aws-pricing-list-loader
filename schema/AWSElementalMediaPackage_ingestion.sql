@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSElementalMediaPackage_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AWSElementalMediaPackage_ingestion" (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "version" TEXT
+    "version" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSElementalMediaPackage_20260205163212_sku ON "AWSElementalMediaPackage_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSElementalMediaPackage_20260205163212_region_code ON "AWSElementalMediaPackage_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSElementalMediaPackage_20260205163212_pricing_region ON "AWSElementalMediaPackage_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonFinSpace_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "AmazonFinSpace_ingestion" (
     "node" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "storage_type" TEXT
+    "storage_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonFinSpace_20240829172011_sku ON "AmazonFinSpace_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonFinSpace_20240829172011_region_code ON "AmazonFinSpace_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonFinSpace_20240829172011_pricing_region ON "AmazonFinSpace_ingestion" ("pricing_region");

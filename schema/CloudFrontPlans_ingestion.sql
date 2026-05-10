@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "CloudFrontPlans_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -191,7 +191,10 @@ CREATE TABLE IF NOT EXISTS "CloudFrontPlans_ingestion" (
     "usage_quota_unit_tls_certificate" TEXT,
     "usage_quota_unit_vpc_origins" TEXT,
     "usage_quota_unit_waf" TEXT,
-    "usage_quota_unit_waf_use_case_protections" TEXT
+    "usage_quota_unit_waf_use_case_protections" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS CloudFrontPlans_20251217134638_sku ON "CloudFrontPlans_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS CloudFrontPlans_20251217134638_region_code ON "CloudFrontPlans_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS CloudFrontPlans_20251217134638_pricing_region ON "CloudFrontPlans_ingestion" ("pricing_region");

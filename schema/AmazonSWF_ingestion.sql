@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonSWF_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AmazonSWF_ingestion" (
     "usage_type" TEXT,
     "operation" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonSWF_20250828153901_sku ON "AmazonSWF_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonSWF_20250828153901_region_code ON "AmazonSWF_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonSWF_20250828153901_pricing_region ON "AmazonSWF_ingestion" ("pricing_region");

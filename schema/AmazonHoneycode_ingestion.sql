@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AmazonHoneycode_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS "AmazonHoneycode_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "tier" TEXT,
-    "usage_tier" TEXT
+    "usage_tier" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AmazonHoneycode_20230824190041_sku ON "AmazonHoneycode_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AmazonHoneycode_20230824190041_region_code ON "AmazonHoneycode_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonHoneycode_20230824190041_pricing_region ON "AmazonHoneycode_ingestion" ("pricing_region");

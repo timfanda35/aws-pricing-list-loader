@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSComputeOptimizer_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS "AWSComputeOptimizer_ingestion" (
     "pricing_unit" TEXT,
     "region_code" TEXT,
     "resource_type" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSComputeOptimizer_20240826152358_sku ON "AWSComputeOptimizer_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSComputeOptimizer_20240826152358_region_code ON "AWSComputeOptimizer_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSComputeOptimizer_20240826152358_pricing_region ON "AWSComputeOptimizer_ingestion" ("pricing_region");

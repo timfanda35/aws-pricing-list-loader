@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSDeviceFarm_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "AWSDeviceFarm_ingestion" (
     "meter_mode" TEXT,
     "os" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSDeviceFarm_20250113181102_sku ON "AWSDeviceFarm_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSDeviceFarm_20250113181102_region_code ON "AWSDeviceFarm_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSDeviceFarm_20250113181102_pricing_region ON "AWSDeviceFarm_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "ContactCenterTelecommZA_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS "ContactCenterTelecommZA_ingestion" (
     "primary_place_of_us" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "transaction_type" TEXT
+    "transaction_type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS ContactCenterTelecommZA_20260316214350_sku ON "ContactCenterTelecommZA_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS ContactCenterTelecommZA_20260316214350_region_code ON "ContactCenterTelecommZA_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS ContactCenterTelecommZA_20260316214350_pricing_region ON "ContactCenterTelecommZA_ingestion" ("pricing_region");

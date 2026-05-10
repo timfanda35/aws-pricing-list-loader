@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "AWSEnterpriseOnRamp_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -26,7 +26,10 @@ CREATE TABLE IF NOT EXISTS "AWSEnterpriseOnRamp_ingestion" (
     "region_code" TEXT,
     "service_name" TEXT,
     "third_party_software_support" TEXT,
-    "who_can_open_cases" TEXT
+    "who_can_open_cases" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS AWSEnterpriseOnRamp_20250116161024_sku ON "AWSEnterpriseOnRamp_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS AWSEnterpriseOnRamp_20250116161024_region_code ON "AWSEnterpriseOnRamp_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSEnterpriseOnRamp_20250116161024_pricing_region ON "AWSEnterpriseOnRamp_ingestion" ("pricing_region");

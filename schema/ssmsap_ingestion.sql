@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "SSMSAP_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE IF NOT EXISTS "SSMSAP_ingestion" (
     "operation" TEXT,
     "check_id" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
 CREATE INDEX IF NOT EXISTS SSMSAP_20250825201726_sku ON "SSMSAP_ingestion" ("sku");
 CREATE INDEX IF NOT EXISTS SSMSAP_20250825201726_region_code ON "SSMSAP_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS SSMSAP_20250825201726_pricing_region ON "SSMSAP_ingestion" ("pricing_region");
