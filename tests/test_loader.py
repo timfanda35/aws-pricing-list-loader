@@ -250,7 +250,7 @@ class TestProcessPricingGroupColumnUnion:
 
         copy_args_used = []
 
-        def mock_copy(conn, table, staging_cols, merge_map, path):
+        def mock_copy(conn, table, staging_cols, merge_map, path, region):
             copy_args_used.append((staging_cols, merge_map))
 
         with patch("app.services.loader.get_db_conn"), \
@@ -275,7 +275,7 @@ class TestProcessPricingGroupColumnUnion:
 
         copy_args_used = []
 
-        def mock_copy(conn, table, staging_cols, merge_map, path):
+        def mock_copy(conn, table, staging_cols, merge_map, path, region):
             copy_args_used.append(staging_cols)
 
         with patch("app.services.loader.get_db_conn"), \
@@ -307,24 +307,24 @@ class TestCopyCsvToTable:
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file), "us-east-1")
 
         execute_calls = [str(c.args[0]) for c in cur.execute.call_args_list]
-        assert any('DROP TABLE IF EXISTS "svc_ingestion_staging"' in s for s in execute_calls)
-        assert any('CREATE UNLOGGED TABLE "svc_ingestion_staging"' in s for s in execute_calls)
-        assert any('ON CONFLICT (rate_code) DO NOTHING' in s for s in execute_calls)
-        assert 'DROP TABLE IF EXISTS "svc_ingestion_staging"' in execute_calls[-1]
+        assert any('DROP TABLE IF EXISTS "svc_ingestion_us_east_1_staging"' in s for s in execute_calls)
+        assert any('CREATE UNLOGGED TABLE "svc_ingestion_us_east_1_staging"' in s for s in execute_calls)
+        assert any('ON CONFLICT (rate_code, pricing_region) DO NOTHING' in s for s in execute_calls)
+        assert 'DROP TABLE IF EXISTS "svc_ingestion_us_east_1_staging"' in execute_calls[-1]
 
     def test_copy_targets_staging_not_ingestion(self, tmp_path):
         csv_file = tmp_path / "test.csv"
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file), "us-east-1")
 
         copy_expert_calls = [str(c.args[0]) for c in cur.copy_expert.call_args_list]
         assert len(copy_expert_calls) == 1
-        assert '"svc_ingestion_staging"' in copy_expert_calls[0]
+        assert '"svc_ingestion_us_east_1_staging"' in copy_expert_calls[0]
         assert '"svc_ingestion"' not in copy_expert_calls[0]
 
     def test_insert_uses_on_conflict_do_nothing(self, tmp_path):
@@ -332,21 +332,21 @@ class TestCopyCsvToTable:
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file), "us-east-1")
 
         insert_calls = [str(c.args[0]) for c in cur.execute.call_args_list
                         if 'INSERT INTO' in str(c.args[0])]
         assert len(insert_calls) == 1
         assert '"svc_ingestion"' in insert_calls[0]
-        assert 'FROM "svc_ingestion_staging"' in insert_calls[0]
-        assert 'ON CONFLICT (rate_code) DO NOTHING' in insert_calls[0]
+        assert 'FROM "svc_ingestion_us_east_1_staging"' in insert_calls[0]
+        assert 'ON CONFLICT (rate_code, pricing_region) DO NOTHING' in insert_calls[0]
 
     def test_commits_after_insert(self, tmp_path):
         csv_file = tmp_path / "test.csv"
         csv_file.write_bytes(b'"rate1","sku1"\n')
 
         conn, cur = self._make_conn()
-        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file))
+        _copy_csv_to_table(conn, "svc_ingestion", ["rate_code", "sku"], {}, str(csv_file), "us-east-1")
 
         conn.commit.assert_called_once()
 
@@ -359,7 +359,7 @@ class TestCopyCsvToTable:
         _copy_csv_to_table(
             conn, "svc_ingestion",
             ["rate_code", "storage_type", "storage_type_2"],
-            mm, str(csv_file),
+            mm, str(csv_file), "us-east-1",
         )
 
         insert_calls = [str(c.args[0]) for c in cur.execute.call_args_list
@@ -379,10 +379,11 @@ class TestCopyCsvToTable:
         _copy_csv_to_table(
             conn, "svc_ingestion",
             ["rate_code", "storage_type", "storage_type_2"],
-            mm, str(csv_file),
+            mm, str(csv_file), "us-east-1",
         )
 
         create_calls = [str(c.args[0]) for c in cur.execute.call_args_list
                         if 'CREATE UNLOGGED' in str(c.args[0])]
         assert len(create_calls) == 1
         assert '"storage_type_2"' in create_calls[0]
+        assert '"pricing_region"' in create_calls[0]

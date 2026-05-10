@@ -132,8 +132,10 @@ def _copy_csv_to_table(
     staging_columns: list[str],
     merge_map: dict[str, list[str]],
     csv_path: str,
+    region: str,
 ) -> None:
-    staging_table = f"{ingestion_table}_staging"
+    region_snake = region.replace('-', '_')
+    staging_table = f"{ingestion_table}_{region_snake}_staging"
 
     suffix_set = {c for variants in merge_map.values() for c in variants[1:]}
     url_ingestion_cols = [c for c in staging_columns if c not in suffix_set]
@@ -156,6 +158,7 @@ def _copy_csv_to_table(
     with conn.cursor() as cur:
         cur.execute(f'DROP TABLE IF EXISTS "{staging_table}"')
         col_defs = ", ".join(f'"{c}" TEXT' for c in staging_columns)
+        col_defs += ', "pricing_region" TEXT'
         cur.execute(f'CREATE UNLOGGED TABLE "{staging_table}" ({col_defs})')
 
     copy_sql = f'COPY "{staging_table}" ({staging_col_list}) FROM STDIN WITH (FORMAT CSV, QUOTE \'"\');'
@@ -164,10 +167,11 @@ def _copy_csv_to_table(
             cur.copy_expert(copy_sql, f)
 
     with conn.cursor() as cur:
+        cur.execute(f'UPDATE "{staging_table}" SET pricing_region = %s', (region,))
         cur.execute(
-            f'INSERT INTO "{ingestion_table}" ({ingestion_col_list}) '
-            f'SELECT {select_list} FROM "{staging_table}" '
-            f'ON CONFLICT (rate_code) DO NOTHING'
+            f'INSERT INTO "{ingestion_table}" ({ingestion_col_list}, "pricing_region") '
+            f'SELECT {select_list}, "pricing_region" FROM "{staging_table}" '
+            f'ON CONFLICT (rate_code, pricing_region) DO NOTHING'
         )
         cur.execute(f'DROP TABLE IF EXISTS "{staging_table}"')
     conn.commit()
@@ -212,6 +216,9 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
         print(f"[TABLE] created {ingestion_table}", file=sys.stderr)
 
         seen_versions: set[str] = set()
+        # TODO: parallel loading — replace this loop with ThreadPoolExecutor so multiple
+        # regions can download CSVs and write to their own staging tables concurrently.
+        # Each region's staging table is already uniquely named with the region suffix.
         for row in rows:
             csv_url = row["csv_url"]
             region = row["region"]
@@ -222,7 +229,7 @@ def _process_pricing_group(rows: list[dict]) -> tuple[str, int]:
                     tmp_path = tmp.name
                 count = _download_csv_strip_header(csv_url, tmp_path)
                 url_staging_cols = per_url_staging.get(csv_url, staging_cols)
-                _copy_csv_to_table(conn, ingestion_table, url_staging_cols, merge_map, tmp_path)
+                _copy_csv_to_table(conn, ingestion_table, url_staging_cols, merge_map, tmp_path, region)
                 print(f"[COPY] {name}/{region} → {ingestion_table} ({count} rows)", file=sys.stderr)
                 regions_loaded += 1
                 seen_versions.add(row_version)

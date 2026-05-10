@@ -65,8 +65,8 @@ class TestColumnDefinition:
     def test_unknown_column_defaults_to_text(self):
         assert _column_definition("description") == '    "description" TEXT'
 
-    def test_rate_code_gets_primary_key(self):
-        assert _column_definition("rate_code") == '    "rate_code" TEXT PRIMARY KEY'
+    def test_rate_code_is_text(self):
+        assert _column_definition("rate_code") == '    "rate_code" TEXT'
 
     def test_price_per_unit_is_decimal(self):
         assert _column_definition("price_per_unit") == '    "price_per_unit" DECIMAL(20,10)'
@@ -110,8 +110,20 @@ class TestBuildSchemaSql:
     def test_includes_all_columns(self):
         sql = build_schema_sql("test_ingestion", ["sku", "rate_code", "description"], "20260101")
         assert '"sku" TEXT' in sql
-        assert '"rate_code" TEXT PRIMARY KEY' in sql
+        assert '"rate_code" TEXT' in sql
         assert '"description" TEXT' in sql
+
+    def test_includes_pricing_region_column(self):
+        sql = build_schema_sql("test_ingestion", ["rate_code"], "20260101")
+        assert '"pricing_region" TEXT NOT NULL' in sql
+
+    def test_composite_primary_key(self):
+        sql = build_schema_sql("test_ingestion", ["rate_code"], "20260101")
+        assert 'PRIMARY KEY (rate_code, pricing_region)' in sql
+
+    def test_creates_index_for_pricing_region(self):
+        sql = build_schema_sql("test_ingestion", ["rate_code"], "20260101")
+        assert 'ON "test_ingestion" ("pricing_region")' in sql
 
     def test_creates_index_for_sku(self):
         sql = build_schema_sql("test_ingestion", ["sku", "rate_code"], "20260101")
