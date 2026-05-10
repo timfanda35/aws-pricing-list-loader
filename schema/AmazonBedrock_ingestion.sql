@@ -1,0 +1,35 @@
+CREATE TABLE IF NOT EXISTS "AmazonBedrock_ingestion" (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "feature" TEXT,
+    "feature_type" TEXT,
+    "inference_type" TEXT,
+    "model" TEXT,
+    "policy_type" TEXT,
+    "provider" TEXT,
+    "region_code" TEXT,
+    "service_tier" TEXT,
+    "service_name" TEXT,
+    "titan_model" TEXT,
+    "titan_model_unit" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
+);
+CREATE INDEX IF NOT EXISTS AmazonBedrock_20260504235304_sku ON "AmazonBedrock_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AmazonBedrock_20260504235304_region_code ON "AmazonBedrock_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AmazonBedrock_20260504235304_pricing_region ON "AmazonBedrock_ingestion" ("pricing_region");

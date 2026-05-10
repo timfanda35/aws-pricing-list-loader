@@ -1,7 +1,7 @@
-CREATE TABLE awsfms_ingestion (
+CREATE TABLE IF NOT EXISTS "AWSFMS_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE awsfms_ingestion (
     "aws_resource" TEXT,
     "plato_protection_policy_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
-CREATE INDEX awsfms_20260126183304_sku ON awsfms_ingestion (sku);
-CREATE INDEX awsfms_20260126183304_region_code ON awsfms_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS AWSFMS_20260126183304_sku ON "AWSFMS_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSFMS_20260126183304_region_code ON "AWSFMS_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSFMS_20260126183304_pricing_region ON "AWSFMS_ingestion" ("pricing_region");

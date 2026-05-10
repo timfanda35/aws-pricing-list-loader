@@ -1,7 +1,7 @@
-CREATE TABLE mobileanalytics_ingestion (
+CREATE TABLE IF NOT EXISTS "mobileanalytics_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -19,7 +19,10 @@ CREATE TABLE mobileanalytics_ingestion (
     "operation" TEXT,
     "included_events" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
-CREATE INDEX mobileanalytics_20230127115017_sku ON mobileanalytics_ingestion (sku);
-CREATE INDEX mobileanalytics_20230127115017_region_code ON mobileanalytics_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS mobileanalytics_20230127115017_sku ON "mobileanalytics_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS mobileanalytics_20230127115017_region_code ON "mobileanalytics_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS mobileanalytics_20230127115017_pricing_region ON "mobileanalytics_ingestion" ("pricing_region");

@@ -1,7 +1,7 @@
-CREATE TABLE comprehend_ingestion (
+CREATE TABLE IF NOT EXISTS "comprehend_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -20,7 +20,10 @@ CREATE TABLE comprehend_ingestion (
     "operation" TEXT,
     "plato_feature_type" TEXT,
     "region_code" TEXT,
-    "service_name" TEXT
+    "service_name" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
-CREATE INDEX comprehend_20260116160258_sku ON comprehend_ingestion (sku);
-CREATE INDEX comprehend_20260116160258_region_code ON comprehend_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS comprehend_20260116160258_sku ON "comprehend_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS comprehend_20260116160258_region_code ON "comprehend_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS comprehend_20260116160258_pricing_region ON "comprehend_ingestion" ("pricing_region");

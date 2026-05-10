@@ -1,0 +1,30 @@
+CREATE TABLE IF NOT EXISTS "AWSConfig_ingestion" (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "category" TEXT,
+    "ci_type" TEXT,
+    "plato_pricing_type" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT,
+    "type" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
+);
+CREATE INDEX IF NOT EXISTS AWSConfig_20250911043741_sku ON "AWSConfig_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSConfig_20250911043741_region_code ON "AWSConfig_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSConfig_20250911043741_pricing_region ON "AWSConfig_ingestion" ("pricing_region");

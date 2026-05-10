@@ -1,7 +1,7 @@
-CREATE TABLE transcribe_ingestion (
+CREATE TABLE IF NOT EXISTS "transcribe_ingestion" (
     "sku" TEXT,
     "offer_term_code" TEXT,
-    "rate_code" TEXT PRIMARY KEY,
+    "rate_code" TEXT,
     "term_type" TEXT,
     "price_description" TEXT,
     "effective_date" DATE,
@@ -18,7 +18,10 @@ CREATE TABLE transcribe_ingestion (
     "operation" TEXT,
     "region_code" TEXT,
     "service_name" TEXT,
-    "supported_modes" TEXT
+    "supported_modes" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
 );
-CREATE INDEX transcribe_20260331003333_sku ON transcribe_ingestion (sku);
-CREATE INDEX transcribe_20260331003333_region_code ON transcribe_ingestion (region_code);
+CREATE INDEX IF NOT EXISTS transcribe_20260331003333_sku ON "transcribe_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS transcribe_20260331003333_region_code ON "transcribe_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS transcribe_20260331003333_pricing_region ON "transcribe_ingestion" ("pricing_region");

@@ -1,0 +1,38 @@
+CREATE TABLE IF NOT EXISTS "AWSGlobalAccelerator_ingestion" (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "endpoint_type" TEXT,
+    "fee_description" TEXT,
+    "from_location" TEXT,
+    "from_location_type" TEXT,
+    "to_location" TEXT,
+    "to_location_type" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "client_location" TEXT,
+    "dominant_non_dominant" TEXT,
+    "from_region_code" TEXT,
+    "pricing_unit" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT,
+    "to_region_code" TEXT,
+    "traffic_direction" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
+);
+CREATE INDEX IF NOT EXISTS AWSGlobalAccelerator_20230914175116_sku ON "AWSGlobalAccelerator_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSGlobalAccelerator_20230914175116_region_code ON "AWSGlobalAccelerator_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSGlobalAccelerator_20230914175116_pricing_region ON "AWSGlobalAccelerator_ingestion" ("pricing_region");

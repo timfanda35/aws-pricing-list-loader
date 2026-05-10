@@ -1,0 +1,37 @@
+CREATE TABLE IF NOT EXISTS "AWSElementalMediaConvert_ingestion" (
+    "sku" TEXT,
+    "offer_term_code" TEXT,
+    "rate_code" TEXT,
+    "term_type" TEXT,
+    "price_description" TEXT,
+    "effective_date" DATE,
+    "starting_range" TEXT,
+    "ending_range" TEXT,
+    "unit" TEXT,
+    "price_per_unit" DECIMAL(20,10),
+    "currency" TEXT,
+    "product_family" TEXT,
+    "service_code" TEXT,
+    "description" TEXT,
+    "location" TEXT,
+    "location_type" TEXT,
+    "usage_type" TEXT,
+    "operation" TEXT,
+    "add_on_feature" TEXT,
+    "api_name" TEXT,
+    "minute_state" TEXT,
+    "normalization_ratio" TEXT,
+    "region_code" TEXT,
+    "service_name" TEXT,
+    "tier" TEXT,
+    "transcoding_result" TEXT,
+    "video_codec" TEXT,
+    "video_frame_rate" TEXT,
+    "video_quality_setting" TEXT,
+    "video_resolution" TEXT,
+    "pricing_region" TEXT NOT NULL,
+    PRIMARY KEY (rate_code, pricing_region)
+);
+CREATE INDEX IF NOT EXISTS AWSElementalMediaConvert_20260410000823_sku ON "AWSElementalMediaConvert_ingestion" ("sku");
+CREATE INDEX IF NOT EXISTS AWSElementalMediaConvert_20260410000823_region_code ON "AWSElementalMediaConvert_ingestion" ("region_code");
+CREATE INDEX IF NOT EXISTS AWSElementalMediaConvert_20260410000823_pricing_region ON "AWSElementalMediaConvert_ingestion" ("pricing_region");

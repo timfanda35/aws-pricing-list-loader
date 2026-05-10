@@ -15,7 +15,7 @@ _COLUMN_TYPE_MAPPINGS = {
     'discounted_rate': 'DECIMAL(20,10)',
     'price_per_unit': 'DECIMAL(20,10)',
 }
-_INDEX_COLUMNS = {'sku', 'region_code', 'discounted_region_code'}
+_INDEX_COLUMNS = {'sku', 'region_code', 'discounted_region_code', 'pricing_region'}
 
 
 def get_csv_column_names(csv_url: str) -> tuple[list[str], dict[str, list[str]]]:
@@ -48,10 +48,7 @@ def get_csv_column_names(csv_url: str) -> tuple[list[str], dict[str, list[str]]]
 
 def _column_definition(col: str) -> str:
     col_type = _COLUMN_TYPE_MAPPINGS.get(col, 'TEXT')
-    definition = f'"{col}" {col_type}'
-    if col == 'rate_code':
-        definition = f"{definition} PRIMARY KEY"
-    return f"    {definition}"
+    return f'    "{col}" {col_type}'
 
 
 def _index_name(table: str, version: str, col: str) -> str:
@@ -64,10 +61,12 @@ def _index_name(table: str, version: str, col: str) -> str:
 
 def build_schema_sql(table: str, columns: list[str], version: str) -> str:
     col_defs = ',\n'.join(_column_definition(c) for c in columns)
+    col_defs += ',\n    "pricing_region" TEXT NOT NULL'
+    col_defs += ',\n    PRIMARY KEY (rate_code, pricing_region)'
     ddl = f'CREATE TABLE IF NOT EXISTS "{table}" (\n{col_defs}\n);'
     index_lines = [
         f'CREATE INDEX IF NOT EXISTS {_index_name(table, version, col)} ON "{table}" ("{col}");'
-        for col in columns if col in _INDEX_COLUMNS
+        for col in list(columns) + ['pricing_region'] if col in _INDEX_COLUMNS
     ]
     return '\n'.join([ddl] + index_lines) + '\n'
 
