@@ -9,7 +9,7 @@ import requests
 
 from app.database import get_db_conn
 from app.services.aws_client import BASE_URL, get_all_pricing_urls
-from app.services.schema_builder import build_schema_sql, get_csv_column_names
+from app.services.schema_builder import COLUMN_TYPE_MAPPINGS, build_schema_sql, get_csv_column_names
 
 
 def load_known_versions(name: str | None = None) -> frozenset[tuple[str, str]]:
@@ -146,13 +146,20 @@ def _copy_csv_to_table(
     staging_set = set(staging_columns)
     select_exprs = []
     for col in url_ingestion_cols:
+        col_type = COLUMN_TYPE_MAPPINGS.get(col)
         variants = merge_map.get(col)
         if variants and len(variants) > 1:
             present = [v for v in variants if v in staging_set]
             if len(present) > 1:
-                select_exprs.append("COALESCE(" + ", ".join(f'"{v}"' for v in present) + ")")
+                expr = "COALESCE(" + ", ".join(f'"{v}"' for v in present) + ")"
+                if col_type:
+                    expr = f"NULLIF({expr}, '')::{col_type}"
+                select_exprs.append(expr)
                 continue
-        select_exprs.append(f'"{col}"')
+        if col_type:
+            select_exprs.append(f'NULLIF("{col}", \'\')::{col_type}')
+        else:
+            select_exprs.append(f'"{col}"')
     select_list = ", ".join(select_exprs)
 
     with conn.cursor() as cur:
