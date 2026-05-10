@@ -10,7 +10,7 @@ from app.services.aws_client import BASE_URL, to_snake_case
 
 SCHEMA_DIR = Path(__file__).parent.parent.parent / "schema"
 
-_COLUMN_TYPE_MAPPINGS = {
+COLUMN_TYPE_MAPPINGS = {
     'effective_date': 'DATE',
     'discounted_rate': 'DECIMAL(20,10)',
     'price_per_unit': 'DECIMAL(20,10)',
@@ -47,7 +47,7 @@ def get_csv_column_names(csv_url: str) -> tuple[list[str], dict[str, list[str]]]
 
 
 def _column_definition(col: str) -> str:
-    col_type = _COLUMN_TYPE_MAPPINGS.get(col, 'TEXT')
+    col_type = COLUMN_TYPE_MAPPINGS.get(col, 'TEXT')
     return f'    "{col}" {col_type}'
 
 
