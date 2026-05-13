@@ -154,17 +154,30 @@ python run_job.py --name AWSComputeSavingsPlan --force
 
 ### Running as a Cloud Run Job
 
-The same container image serves both the API and the job. Override the default `uvicorn` command when creating the Cloud Run Job:
+The same container image serves both the API and the job. The container entrypoint passes arguments through, so override the CMD via `--args`:
 
 ```bash
+# Create the job
 gcloud run jobs create aws-pricing-loader \
   --image REGION-docker.pkg.dev/PROJECT/REPO/IMAGE \
-  --command python \
-  --args run_job.py \
-  --set-env-vars POSTGRES_HOST=...,POSTGRES_DB=...,POSTGRES_USER=...,POSTGRES_PASSWORD=...
+  --args "python,run_job.py" \
+  --set-env-vars "POSTGRES_HOST=...,POSTGRES_DB=...,POSTGRES_USER=...,POSTGRES_PASSWORD=..."
+
+# Execute the job
+gcloud run jobs execute aws-pricing-loader
+
+# Force reload all services (skip version check)
+gcloud run jobs update aws-pricing-loader \
+  --args "python,run_job.py,--force"
+gcloud run jobs execute aws-pricing-loader
+
+# Target a single service
+gcloud run jobs update aws-pricing-loader \
+  --args "python,run_job.py,--name,comprehend"
+gcloud run jobs execute aws-pricing-loader
 ```
 
-Add `--args --force` to force a full reload, or `--args --name,comprehend` to target a single service.
+Commas in `--args` delimit separate argv entries.
 
 ## How loading works
 
