@@ -2,7 +2,7 @@
 
 Crawls the [AWS Pricing API](https://pricing.us-east-1.amazonaws.com) to discover all service and savings plan pricing URLs, and bulk-loads every region's pricing CSV into PostgreSQL using an ingestion/swap pattern.
 
-Exposed as a FastAPI HTTP service, with a CLI available for local use.
+Exposed as a FastAPI HTTP service, with a CLI for local use and a Cloud Run Job entry point for batch execution.
 
 ## Setup
 
@@ -125,6 +125,59 @@ python fetch_pricing_index.py --load --name AWSDatabaseSavingsPlans
 ```
 
 Already-loaded versions are skipped automatically (tracked in `aws_pricing_list_versions`).
+
+## Cloud Run Job
+
+`run_job.py` is designed to run as a [Google Cloud Run Job](https://cloud.google.com/run/docs/create-jobs) (one-time batch execution). It runs three steps in sequence, exiting with code 1 on any failure so the job runtime can detect and retry failures.
+
+### Steps
+
+1. **DB migrations** — applies any pending SQL migrations (same as API startup)
+2. **Version check** — queries current loaded versions, discovers how many service/region entries have new data available
+3. **Load** — streams and loads all new pricing CSVs into PostgreSQL
+
+### Usage
+
+```bash
+# Load all services with new versions
+python run_job.py
+
+# Load a single service (useful for testing)
+python run_job.py --name AWSComputeSavingsPlan
+
+# Force reload all services (ignore already-loaded versions)
+python run_job.py --force
+
+# Force reload a single service
+python run_job.py --name AWSComputeSavingsPlan --force
+```
+
+### Running as a Cloud Run Job
+
+The same container image serves both the API and the job. The container entrypoint passes arguments through, so override the CMD via `--args`:
+
+```bash
+# Create the job
+gcloud run jobs create aws-pricing-loader \
+  --image REGION-docker.pkg.dev/PROJECT/REPO/IMAGE \
+  --args "python,run_job.py" \
+  --set-env-vars "POSTGRES_HOST=...,POSTGRES_DB=...,POSTGRES_USER=...,POSTGRES_PASSWORD=..."
+
+# Execute the job
+gcloud run jobs execute aws-pricing-loader
+
+# Force reload all services (skip version check)
+gcloud run jobs update aws-pricing-loader \
+  --args "python,run_job.py,--force"
+gcloud run jobs execute aws-pricing-loader
+
+# Target a single service
+gcloud run jobs update aws-pricing-loader \
+  --args "python,run_job.py,--name,comprehend"
+gcloud run jobs execute aws-pricing-loader
+```
+
+Commas in `--args` delimit separate argv entries.
 
 ## How loading works
 

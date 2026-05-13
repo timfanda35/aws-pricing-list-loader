@@ -26,6 +26,15 @@ python fetch_pricing_index.py --load
 # CLI — load a single service or savings plan (for testing)
 python fetch_pricing_index.py --load --name comprehend
 python fetch_pricing_index.py --load --name AWSDatabaseSavingsPlans
+
+# Cloud Run Job — run migrations, check versions, and load all pricing data
+python run_job.py
+
+# Cloud Run Job — load a single service (for testing)
+python run_job.py --name AWSComputeSavingsPlan
+
+# Cloud Run Job — force reload all services (skip version check)
+python run_job.py --force
 ```
 
 ```bash
